@@ -18,3 +18,7 @@
 ## Limits
 
 Tests use a simulated DOM. Required browser-control tooling is unavailable, so real Safari/iPhone layout, file-download UX and cookie restrictions require device QA. Target-domain TLS/certificates and response security headers remain deployment checks. `_headers` is a provider-specific template, not proof of enforcement. Some source dates/runtimes remain unverified and are labeled; not all title metadata has been independently reverified. External viewing sites are outside this audit. Friends use manually shared, self-reported snapshots. Clearing browser data can still remove progress: export before changing domains. No guarantee of zero bugs or complete security.
+
+## Home-screen packaging check
+
+Apple title/capable/icon tags and standalone manifest added. Name: Marvel List. Relative paths checked against both root-domain and GitHub project-folder URLs. PNG icon sizes verified at 180, 192 and 512 pixels. No service worker caching or automatic reloads added. Installation on an actual iPhone remains unverified.

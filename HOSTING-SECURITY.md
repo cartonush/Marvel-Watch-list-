@@ -8,4 +8,4 @@ Use HTTPS with automatic certificate renewal and redirect HTTP to HTTPS. Enable 
 
 There are no account credentials, server profiles or API keys in this static app. Shared progress is user-reported, not tamper-proof. Third-party watch destinations are outside this app’s control. Cookies are sent to the same host and are accessible to this app’s JavaScript. Changing domain requires backup/import. Do not host unrelated untrusted scripts on the same origin.
 
-No PWA or service worker was added. Browser and production-header QA must be performed on the target domain before final release.
+Home-screen standalone metadata and a manifest are included. No service worker or offline caching is used. Browser and production-header QA must be performed on the target domain before final release.

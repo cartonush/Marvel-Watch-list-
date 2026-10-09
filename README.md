@@ -8,4 +8,8 @@ New: mobile header auto-hide, Undo, full JSON backup and file import, local fini
 
 110 titles retained. Unknown dates/runtimes are labeled. Series finish estimates use average episode durations. Friends are manually shared snapshots, not live accounts.
 
-Read AUDIT.md for checks/limits and HOSTING-SECURITY.md before deploying to a custom domain. The _headers file works only on hosts supporting that format; GitHub Pages does not automatically apply it. HTML CSP is included. PWA is intentionally deferred.
+Read AUDIT.md for checks/limits and HOSTING-SECURITY.md before deploying to a custom domain. The _headers file works only on hosts supporting that format; GitHub Pages does not automatically apply it. HTML CSP is included. Home-screen installation is enabled as Marvel List; offline caching is not enabled.
+
+
+## iPhone installation
+Upload all contents to your existing GitHub Pages folder, including index.html, manifest.webmanifest, apple-touch-icon.png and icons/. Wait for deployment, then open the page in Safari > Share > Add to Home Screen. Keep Open as Web App enabled when available. The suggested name is Marvel List. Export a full backup before replacing an old installed shortcut, whose name/icon may have been cached by iOS.
