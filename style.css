@@ -44,3 +44,17 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 @media(max-width:1250px) and (min-width:1001px){.list-view .card-info{grid-template-columns:minmax(0,1fr) 120px 110px}}
 @media(max-width:1000px){.list-view .card-info{display:block}.list-view .priority-badge{margin:5px 0}.list-view .card-info h4{min-height:0}}
 @media(max-width:700px){.header-hidden .topbar{transform:translateY(-110%)}.header-hidden .topbar:focus-within{transform:none}.nav-shade{display:block;position:fixed;inset:66px 0 0;z-index:28;background:#0008;backdrop-filter:blur(2px)}.nav-open body{overflow:hidden}.sidebar{height:calc(100dvh - 66px);padding-bottom:max(24px,env(safe-area-inset-bottom))}.sidebar .nav-item{min-height:44px}.finish-time strong{font-size:12px}.finish-time small{font-size:10px}.undo-bar{bottom:max(12px,env(safe-area-inset-bottom));padding:8px 10px;gap:8px}.undo-bar span{max-width:55vw}.phase-heading h3{overflow-wrap:anywhere}.phase-progress{flex:none}.friend-numbers{gap:8px;flex-wrap:wrap}dialog{max-height:calc(100dvh - 30px);padding-bottom:max(24px,env(safe-area-inset-bottom))}}
+
+/* Release 1.0.0: locally saved skip list and visible published version. */
+.app-version{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:5px 9px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.card.skipped .poster-label{background:#30283b;color:#e8c9ff}
+.card.skipped .card-info h4:after{content:" · Skipped";font-size:11px;font-weight:500;color:var(--muted)}
+.skip-toggle{background:transparent;border:1px solid var(--line);border-radius:5px;padding:7px 10px;color:var(--muted);font-size:11px}
+.skip-toggle:hover,.skip-toggle[aria-pressed="true"]{color:var(--red);border-color:var(--red)}
+.next-actions .skip-toggle{font-size:13px;min-height:46px;padding:12px 18px;background:#ffffff0c;border-color:#ffffff36;color:#fff}
+.next-actions .skip-toggle:hover{border-color:var(--red);color:var(--red)}
+[data-theme=light] .next-actions .skip-toggle{background:#fff;color:#32283f;border-color:#c9bfd3}
+[data-theme=light] .app-version{color:#565c70}
+@media(max-width:700px){.top-caption{display:none}.app-version{font-size:9px;padding:4px 6px}.next-actions .skip-toggle{flex:1}}
+@media(max-width:390px){.app-version{position:absolute;top:51px;left:20px;padding:0;border:0;background:none;font-size:9px}}
+.card-actions{flex-wrap:wrap}.card-actions .watch-toggle{flex:1 1 100%}.card-actions .skip-toggle{flex:1 1 auto}.card-actions .details{min-height:31px}

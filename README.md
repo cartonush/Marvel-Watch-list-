@@ -65,3 +65,7 @@ On iPhone: open the deployed HTTPS page in Safari, Share, Add to Home Screen, ke
 ## Poster update
 
 Nine requested titles now reference distinct local poster files. Six newly sourced posters are credited per title in dist/data.json; three existing local posters were repackaged under new filenames to refresh cached paths. Upload the complete dist/assets directory with data.json, otherwise posters will be missing on GitHub Pages. X-Men ’97 Season 2 uses the official Marvel season image.
+
+## Version 1.0.0
+
+The visible header version starts at 1.0.0 with the first GitHub-published Skip release. Increment the displayed version in dist/index.html only in commits that are published to the user's GitHub repository. Skip is a personal saved list separate from watched progress. Skipped titles leave Next to watch, stay uncompleted in statistics, and appear in Skipped Items across routes. Marking a skipped title watched clears its skipped flag. Undo, reset and full backup include the skipped list; old cookies/backups without it remain supported.
