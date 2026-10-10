@@ -1,15 +1,67 @@
 # Marvel Watch
 
-Upload these files to your GitHub repository root. Enable Settings > Pages > main branch > root. Keep assets beside index.html. No build or API keys required. Use HTTPS.
+English, responsive, buildless Marvel watch tracker based on the user's Google Sheets LIST tab, imported 2026-10-09.
 
-Full collection: MCU sheet first, then Road to Doomsday extras. Other source routes remain available. Release-date sorting updates the queue within those sections.
+## Deployment
 
-New: mobile header auto-hide, Undo, full JSON backup and file import, local finish-time estimates, and the earliest shared unwatched movie for each friend. My profile > Download full backup exports progress, favorites, settings, friends and current view. Import previews before applying. Older MW1 codes still work. Export before changing domains or clearing cookies.
+Static output is `dist/`. No dependencies, API keys, server database, or runtime integrations. Hosting identity is in `.openai/hosting.json`.
 
-110 titles retained. Unknown dates/runtimes are labeled. Series finish estimates use average episode durations. Friends are manually shared snapshots, not live accounts.
+## Data
 
-Read AUDIT.md for checks/limits and HOSTING-SECURITY.md before deploying to a custom domain. The _headers file works only on hosts supporting that format; GitHub Pages does not automatically apply it. HTML CSP is included. Home-screen installation is enabled as Marvel List; offline caching is not enabled.
+`dist/data.json` contains 86 titles, 317 units (movies/episodes), and all 84 original watch URLs. Two additions, X-Men: First Class and The Defenders, link to official Disney+ pages. Thirteen unknown/zero durations remain null. Data is a snapshot, not live synchronization. `watched` holds the source's 23 checked titles for opt-in additive import; new visitors start fresh. Poster provenance is recorded per item.
 
+The source's unusual dates are preserved and explained in the data dialog. Runtime estimates for partly completed seasons divide total season duration evenly by episode count.
 
-## iPhone installation
-Upload all contents to your existing GitHub Pages folder, including index.html, manifest.webmanifest, apple-touch-icon.png and icons/. Wait for deployment, then open the page in Safari > Share > Add to Home Screen. Keep Open as Web App enabled when available. The suggested name is Marvel List. Export a full backup before replacing an old installed shortcut, whose name/icon may have been cached by iOS.
+## Persistence
+
+Progress, favorites, and profile name are stored in a compact first-party cookie `marvel_watch_v1` with a 400-day rolling maximum age, SameSite=Lax, Path=/ and Secure on HTTPS. Up to five comparison snapshots use separate `marvel_friend_N` cookies. Cookies are browser/device scoped. Storage failures are shown and export remains available. Cookies are sent to this site's host in normal HTTP requests; there is no profile synchronization service.
+
+`MW1.` backup/share codes contain version, profile ID, name, timestamp, and the episode progress array. Downloads also contain favorites. Imported snapshots are strictly range-validated and names are escaped. Friend links use the URL fragment, which is removed after staging an import. The user must add the friend explicitly. Comparisons are snapshots, not live feeds.
+
+## Validation
+
+Run `node --check dist/app.js` and `node validate.mjs`. No managed preview was launched because the required control-browser skill is unavailable in this session. Browser layout and interaction QA remain unverified.
+
+## Updating
+
+Preserve item IDs and array positions for cookie and backup compatibility. New entries are appended; the separate order field controls viewing order. Legacy 84-entry cookies, friend codes, and backups are padded with two unwatched entries. Road to Doomsday contains X-Men/Deadpool and optional Daredevil/Defenders subsections. The next-title queue follows the selected collection. `extract-source.py` is a one-off XML-based importer from the task's source workbook; do not rerun it without reapplying posters. `download-posters.py` records provenance and optimizes local poster assets from MCU API and the mcu-flowchart poster collection.
+
+## Added title sources
+
+- https://www.20thcenturystudios.com/movies/x-men-first-class (2011, 131 minutes)
+- https://www.disneyplus.com/browse/entity-9f9e9ae3-88d8-467b-8969-28d253cc4687
+- https://www.disneyplus.com/en-il/browse/entity-61687bed-4a66-4657-9252-df80ca1d1fbc
+
+Availability varies by region and subscription. Road to Doomsday is a fan recommendation, not a required official syllabus.
+
+## Settings and Doomsday routes
+
+Settings use a separate marvel_settings_v1 cookie. Theme (dark/light/system), accent, hide-watched, compact view, labels, and reduced motion persist on this device. Focused route has 15 tracked entries: 14 from the Disney+ guide (Loki split into seasons) plus our Endgame recommendation. Expanded adds optional editorial context. Friend comparisons use the same selected route for both people. Filters never delete progress. All 86 titles have classifications and reasons. Source checked 2026-10-09: https://www.disneyplus.com/explore/articles/countdown-to-avengers-doomsday . No missing film or series was found against that guide. These are preparation recommendations, not guaranteed mandatory viewing.
+
+## RoadToDoomsday sync — October 9, 2026
+
+The selected fan tracker is now the route source: https://roadtodoomsday.com and https://roadtodoomsday.com/guide. 24 optional entries were appended, bringing the full collection to 110. All earlier 86 item positions, IDs, episode counts, original runtimes and URLs remain unchanged. Legacy 84- and 86-entry profiles migrate by appending zeros; favorites and friend snapshots remain compatible. The tracker covers 103 distinct entries after expanding bundles; seven existing entries outside that tracker are retained in Full collection.
+
+Routes: 15-title source speedrun; 62-title main route; 41 optional entries; source route including optional entries; full 110-title collection. Source tiers are fan recommendations, not official plot requirements. Road steps preserve the Hawkeye 1–5 / No Way Home / Hawkeye 6 checkpoints; First Class precedes Days of Future Past per the written guide. Other season bundles are expanded without creating duplicate progress. New items link to IMDb title search until user watch links are available. Unknown short-film runtimes/dates remain unknown; X-Men 97 Season 2 is tracked as a whole-season placeholder with no asserted release date or episode count.
+
+UI accents use the selected CSS variable, including headings, focus rings, phase dots, poster overlays, hero shading, profile tint, progress and active controls. Green watched-state indicators remain semantic. This is a source snapshot, not a recurring synchronization service.
+
+## Reliability update — October 9, 2026
+
+Full collection follows the original sheet MCU section before extras. Release-date sorting changes Next to watch and preserves that partition; unknown dates sort last within each section. Name/runtime sorts are for browsing. Road routes retain episode checkpoints unless release order is selected. The malformed Thor: The Dark World date is corrected to 2013-11-08, with its D23 source recorded.
+
+Undo retains the last 20 progress/favorite/import/reset actions in memory. Full JSON backups contain ID-keyed progress, favorites, friend snapshots, settings and view filters. Imports preview before applying, validate size/IDs/counts and cookie capacity, and attempt rollback on write failure. Legacy MW1 codes and comparison links remain supported.
+
+Finish estimates use the local device clock and label next-day finishes. Series use average episode lengths. Friends receive the earliest shared unwatched movie based on the chosen route and saved snapshot. Mobile header hides downward and returns upward; navigation, compact labels, tap targets and long text have been adjusted.
+
+Security: validated data, URL/path allowlists, normalized imports, independent malformed-link handling, HTML CSP and no-referrer. See HOSTING-SECURITY.md for response headers and final-domain requirements. No PWA added.
+
+## iPhone home-screen app — Marvel List
+
+Upload the complete dist contents to the same GitHub Pages folder as before. index.html now includes the Apple standalone/title/touch-icon settings and links to manifest.webmanifest. PNG icons use the existing M logo. Manifest start_url, scope and id are relative so project pages such as /repo/ remain in the correct folder.
+
+On iPhone: open the deployed HTTPS page in Safari, Share, Add to Home Screen, keep Open as Web App enabled if shown, then Add. The suggested name is Marvel List. If an older home-screen shortcut exists, export a full backup from it before replacing it; iOS may retain its original icon/name. This update enables standalone launch but does not add offline caching or a service worker. Browser/device validation still remains.
+
+## Poster update
+
+Nine requested titles now reference distinct local poster files. Six newly sourced posters are credited per title in dist/data.json; three existing local posters were repackaged under new filenames to refresh cached paths. Upload the complete dist/assets directory with data.json, otherwise posters will be missing on GitHub Pages. X-Men ’97 Season 2 uses the official Marvel season image.
