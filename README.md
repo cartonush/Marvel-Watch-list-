@@ -68,4 +68,9 @@ Nine requested titles now reference distinct local poster files. Six newly sourc
 
 ## Version 1.0.0
 
-The visible header version starts at 1.0.0 with the first GitHub-published Skip release. Increment the displayed version in dist/index.html only in commits that are published to the user's GitHub repository. Skip is a personal saved list separate from watched progress. Skipped titles leave Next to watch, stay uncompleted in statistics, and appear in Skipped Items across routes. Marking a skipped title watched clears its skipped flag. Undo, reset and full backup include the skipped list; old cookies/backups without it remain supported.
+The current displayed version is 1.2. Bump it only when the owner explicitly asks to advance the version; the next version is 1.3, then 1.4, and so on. Publish the requested version with its GitHub update. Routine edits do not automatically advance the displayed version. Skip is a personal saved list separate from watched progress. Skipped titles leave Next to watch, stay uncompleted in statistics, and appear in Skipped Items across routes. Marking a skipped title watched clears its skipped flag. Undo, reset and full backup include the skipped list; old cookies/backups without it remain supported.
+
+
+## Version 1.2
+
+Updated 22 title watch-link entries and six runtimes supplied by the owner on October 11, 2026. All other metadata, title identities and ordering are preserved. The Agent Carter One-Shot intentionally uses the supplied Item 47 URL, pending correction from the owner. X-Men ’97 Season 2 uses the supplied total runtime 04:26:27.
