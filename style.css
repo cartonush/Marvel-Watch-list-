@@ -58,3 +58,14 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 @media(max-width:700px){.top-caption{display:none}.app-version{font-size:9px;padding:4px 6px}.next-actions .skip-toggle{flex:1}}
 @media(max-width:390px){.app-version{position:absolute;top:51px;left:20px;padding:0;border:0;background:none;font-size:9px}}
 .card-actions{flex-wrap:wrap}.card-actions .watch-toggle{flex:1 1 100%}.card-actions .skip-toggle{flex:1 1 auto}.card-actions .details{min-height:31px}
+
+/* Version 1.3: release countdown and route-aware daily viewing pace. */
+.doomsday-countdown{position:relative;padding:28px 24px;margin-bottom:24px;text-align:center;background:var(--panel);border:1px solid var(--line);border-top:3px solid var(--red);border-radius:16px;overflow:hidden}
+.doomsday-countdown h2{margin:8px 0;font-family:Oswald,Heebo,sans-serif;font-size:clamp(23px,3vw,36px)}
+.deadline-date,.deadline-note{color:var(--muted);font-size:12px;margin:8px 0}.deadline-note{max-width:680px;margin:12px auto 0;line-height:1.7}
+.countdown-clock{display:grid;grid-template-columns:repeat(4,minmax(0,100px));justify-content:center;gap:12px;margin:22px auto;direction:ltr;font-variant-numeric:tabular-nums}
+.countdown-clock div{padding:12px 6px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+.countdown-clock strong{display:block;font:600 clamp(26px,4vw,42px)/1.15 Oswald,Heebo,sans-serif}
+.countdown-clock span{display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-top:7px}
+.daily-pace{display:flex;flex-direction:column;align-items:center;gap:3px}.daily-pace strong{color:var(--red);font-size:30px;font-variant-numeric:tabular-nums}.daily-pace span{font-size:13px}
+@media(max-width:480px){.doomsday-countdown{padding:22px 14px}.countdown-clock{gap:7px}.countdown-clock div{padding:10px 3px}.countdown-clock span{font-size:9px;letter-spacing:.4px}}

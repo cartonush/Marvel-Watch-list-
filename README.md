@@ -68,9 +68,14 @@ Nine requested titles now reference distinct local poster files. Six newly sourc
 
 ## Version 1.0.0
 
-The current displayed version is 1.2. Bump it only when the owner explicitly asks to advance the version; the next version is 1.3, then 1.4, and so on. Publish the requested version with its GitHub update. Routine edits do not automatically advance the displayed version. Skip is a personal saved list separate from watched progress. Skipped titles leave Next to watch, stay uncompleted in statistics, and appear in Skipped Items across routes. Marking a skipped title watched clears its skipped flag. Undo, reset and full backup include the skipped list; old cookies/backups without it remain supported.
+The current displayed version is 1.3. Bump it only when the owner explicitly asks to advance the version; the next version is 1.4, then 1.5, and so on. Publish the requested version with its GitHub update. Routine edits do not automatically advance the displayed version. Skip is a personal saved list separate from watched progress. Skipped titles leave Next to watch, stay uncompleted in statistics, and appear in Skipped Items across routes. Marking a skipped title watched clears its skipped flag. Undo, reset and full backup include the skipped list; old cookies/backups without it remain supported.
 
 
 ## Version 1.2
 
 Updated 22 title watch-link entries and six runtimes supplied by the owner on October 11, 2026. All other metadata, title identities and ordering are preserved. The Agent Carter One-Shot intentionally uses the supplied Item 47 URL, pending correction from the owner. X-Men ’97 Season 2 uses the supplied total runtime 04:26:27.
+
+
+## Version 1.3
+
+Live countdown to the owner-specified December 18, 2026 at 20:00 Israel time. Daily hours use remaining known runtime in the selected route divided by fractional 24-hour days to the deadline. This matches Still to watch, including skipped titles; unknown runtimes and partial-season estimates are disclosed. The timer stops at zero and resumes accurately after a background tab returns.

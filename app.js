@@ -27,7 +27,7 @@ function save(){state.t=Date.now();try{writeCookie('marvel_watch_v1',state);$('#
 function saveFriends(){try{for(let i=0;i<5;i++){if(friends[i])writeCookie('marvel_friend_'+i,friends[i]);else document.cookie=`marvel_friend_${i}=; Max-Age=0; Path=/`}}catch(e){toast(e.message)}}
 function time(seconds,long=false){if(seconds==null)return 'Unknown runtime';seconds=Math.round(seconds);const d=Math.floor(seconds/86400),h=Math.floor(seconds/3600)%24,m=Math.floor(seconds/60)%60,s=seconds%60;const clock=[d?h:Math.floor(seconds/3600),m,s].map(n=>String(n).padStart(2,'0')).join(':');return d?`${d} ${long?'days and ':'d · '}${clock}`:clock}
 function metrics(p,full=false){let count=0,eps=0,seconds=0,unknown=0,partial=false;items.forEach((x,i)=>{if(!full&&!inRoute(x))return;const n=p[i]||0;eps+=n;if(n===x.episodes)count++;if(x.seconds!=null)seconds+=x.seconds*n/x.episodes;else if(n<x.episodes)unknown++;if(n>0&&n<x.episodes)partial=true});return{count,eps,seconds,unknown,partial,percent:Math.round(count/((full?items.length:items.filter(inRoute).length)||1)*100)}}
-function renderStats(){const m=metrics(state.p),total=items.filter(inRoute).reduce((a,x)=>a+(x.seconds||0),0),remaining=total-m.seconds;$('#stats').innerHTML=`<div class="stat"><span class="stat-icon">◉</span><div class="stat-label">My journey</div><div class="stat-value">${m.percent}% <small>complete</small></div><div class="stat-note">${m.count} of ${items.filter(inRoute).length} titles</div></div><div class="stat"><span class="stat-icon">✓</span><div class="stat-label">Movies & episodes watched</div><div class="stat-value">${m.eps} <small>/ ${items.filter(inRoute).reduce((a,x)=>a+x.episodes,0)}</small></div><div class="stat-note">Every episode is another step</div></div><div class="stat"><span class="stat-icon">◷</span><div class="stat-label">Time watched</div><div class="stat-value" style="font-size:23px">${time(m.seconds)}</div><div class="stat-note">${m.partial?'Includes estimates for partial seasons':'Based on known runtimes in the sheet'}</div></div><div class="stat"><span class="stat-icon">⌛</span><div class="stat-label">Still to watch</div><div class="stat-value" style="font-size:23px">${time(remaining)}</div><div class="stat-note">${m.unknown?`Excludes ${m.unknown} titles with unknown runtime`:m.partial?'Includes estimates for remaining episodes':'Time remaining in your journey'}</div></div>`;$('#side-percent').textContent=m.percent+'%';$('#side-bar').style.width=m.percent+'%';$('#side-copy').textContent=m.count?`${m.count} titles down. ${items.filter(inRoute).length-m.count} to go.`:'Every journey starts with one movie.';$('#avatar').textContent=state.name==='My journey'?'C':[...state.name][0];$('#profile-label').textContent=state.name==='My journey'?'My profile':state.name}
+function renderStats(){updateDoomsday();const m=metrics(state.p),total=items.filter(inRoute).reduce((a,x)=>a+(x.seconds||0),0),remaining=total-m.seconds;$('#stats').innerHTML=`<div class="stat"><span class="stat-icon">◉</span><div class="stat-label">My journey</div><div class="stat-value">${m.percent}% <small>complete</small></div><div class="stat-note">${m.count} of ${items.filter(inRoute).length} titles</div></div><div class="stat"><span class="stat-icon">✓</span><div class="stat-label">Movies & episodes watched</div><div class="stat-value">${m.eps} <small>/ ${items.filter(inRoute).reduce((a,x)=>a+x.episodes,0)}</small></div><div class="stat-note">Every episode is another step</div></div><div class="stat"><span class="stat-icon">◷</span><div class="stat-label">Time watched</div><div class="stat-value" style="font-size:23px">${time(m.seconds)}</div><div class="stat-note">${m.partial?'Includes estimates for partial seasons':'Based on known runtimes in the sheet'}</div></div><div class="stat"><span class="stat-icon">⌛</span><div class="stat-label">Still to watch</div><div class="stat-value" style="font-size:23px">${time(remaining)}</div><div class="stat-note">${m.unknown?`Excludes ${m.unknown} titles with unknown runtime`:m.partial?'Includes estimates for remaining episodes':'Time remaining in your journey'}</div></div>`;$('#side-percent').textContent=m.percent+'%';$('#side-bar').style.width=m.percent+'%';$('#side-copy').textContent=m.count?`${m.count} titles down. ${items.filter(inRoute).length-m.count} to go.`:'Every journey starts with one movie.';$('#avatar').textContent=state.name==='My journey'?'C':[...state.name][0];$('#profile-label').textContent=state.name==='My journey'?'My profile':state.name}
 function isDone(i){return state.p[i]===items[i].episodes}
 function isSkipped(i){return state.s.includes(items[i].id)}
 function toggleSkip(i){if(!items[i]||isDone(i))return;rememberUndo('Skipped Items');state.s=isSkipped(i)?state.s.filter(id=>id!==items[i].id):[...state.s,items[i].id];save();refresh()}
@@ -122,5 +122,33 @@ let previousScroll=0;
 globalThis.addEventListener?.('scroll',()=>{const current=Math.max(0,globalThis.scrollY||0);if(Math.abs(current-previousScroll)<8&&current>80)return;const hide=!!globalThis.matchMedia?.('(max-width: 700px)').matches&&current>100&&current>previousScroll&&$('#menu').getAttribute('aria-expanded')!=='true'&&!modal.open;document.documentElement.classList.toggle('header-hidden',hide);previousScroll=current},{passive:true});
 globalThis.addEventListener?.('focusin',e=>{if(e.target.closest?.('.topbar'))document.documentElement.classList.remove('header-hidden')});
 closeSidebar();
+
+
+// The owner's target is 20:00 Asia/Jerusalem (UTC+02:00 on December 18).
+const DOOMSDAY_DEADLINE=Date.parse('2026-12-18T20:00:00+02:00');
+function doomsdayPlan(now=Date.now()){
+ const milliseconds=Math.max(0,DOOMSDAY_DEADLINE-Number(now));
+ const m=metrics(state.p),total=items.filter(inRoute).reduce((sum,x)=>sum+(x.seconds||0),0);
+ const remaining=Math.max(0,total-m.seconds);
+ return {milliseconds,remaining,unknown:m.unknown,partial:m.partial,hoursPerDay:milliseconds>0?remaining/3600/(milliseconds/86400000):null};
+}
+function updateDoomsday(now=Date.now()){
+ if(!state||!items||document.hidden)return;
+ const p=doomsdayPlan(now),seconds=Math.ceil(p.milliseconds/1000);
+ const values=[Math.floor(seconds/86400),Math.floor(seconds%86400/3600),Math.floor(seconds%3600/60),seconds%60];
+ ['days','hours','minutes','seconds'].forEach((key,i)=>{$('#doom-'+key).textContent=String(values[i]).padStart(2,'0')});
+ const expired=p.milliseconds===0,complete=p.remaining===0&&p.unknown===0;
+ $('#doom-pace').textContent=expired?'— h/d':p.hoursPerDay>0&&p.hoursPerDay<0.1?'<0.1 h/d':p.hoursPerDay.toFixed(1)+' h/d';
+ $('#doom-pace-label').textContent=expired?'The countdown has ended':complete?'Your route is complete!':'Daily viewing to finish your route';
+ const skipped=items.some((x,i)=>inRoute(x)&&isSkipped(i)&&!isDone(i));
+ $('#doom-note').textContent=expired?'December 18, 2026 · 20:00 Israel time — target reached.':
+ `${ROUTES[prefs.route]} · ${time(p.remaining)} left to watch. `+
+ (p.unknown?`Excludes ${p.unknown} titles with unknown runtime. `:'')+
+ (skipped?'Includes skipped titles. ':'')+
+ (p.partial?'Partial-season runtimes are estimated. ':'')+
+ (p.hoursPerDay>24?'This route needs more than 24 hours per day; choose a shorter route.':'Updates with your progress and time remaining.');
+}
+globalThis.setInterval?.(()=>updateDoomsday(),1000);
+document.addEventListener('visibilitychange',()=>updateDoomsday());
 
 init();
