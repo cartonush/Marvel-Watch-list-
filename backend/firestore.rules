@@ -1,0 +1,111 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function owner() {
+      return signedIn() && request.auth.token.email_verified == true
+        && request.auth.uid == get(/databases/$(database)/documents/system/owner).data.uid;
+    }
+    function approved() {
+      return signedIn() && request.auth.token.email_verified == true
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'approved'
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.view == true;
+    }
+    function manage() {
+      return approved() && (owner()
+        || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.manage == true
+        || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.Fmanage == true);
+    }
+    function fullManage() {
+      return approved() && (owner()
+        || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.Fmanage == true);
+    }
+    function userShape(d) {
+      return d.keys().hasAll(['email','view','manage','Fmanage','status','createdAt','updatedAt'])
+        && d.keys().hasOnly(['email','view','manage','Fmanage','status','createdAt','updatedAt'])
+        && d.email is string && d.email.size() <= 254
+        && d.view is bool && d.manage is bool && d.Fmanage is bool
+        && d.status in ['pending','approved','disabled']
+        && d.createdAt is timestamp && d.updatedAt == request.time
+        && (d.status == 'approved' || (!d.view && !d.manage && !d.Fmanage));
+    }
+    match /system/{key} {
+      // Owner bootstrap uses the Admin SDK. No browser can assign or replace the owner.
+      allow read: if owner();
+      allow write: if false;
+    }
+    match /users/{uid} {
+      allow get: if (signedIn() && request.auth.uid == uid) || fullManage();
+      allow list: if fullManage();
+      allow create: if signedIn() && request.auth.uid == uid
+        && userShape(request.resource.data)
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.status == 'pending'
+        && request.resource.data.createdAt == request.time;
+      allow update: if userShape(request.resource.data)
+        && uid != get(/databases/$(database)/documents/system/owner).data.uid
+        && request.resource.data.email == resource.data.email
+        && request.resource.data.createdAt == resource.data.createdAt
+        && (owner() || (fullManage() && uid != request.auth.uid
+          && !resource.data.manage && !resource.data.Fmanage
+          && !request.resource.data.manage && !request.resource.data.Fmanage
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','view','updatedAt'])));
+      // Disable accounts instead of removing their audit identity.
+      allow delete: if false;
+    }
+    function titleShape(d) {
+      return d.keys().hasAll(['title','date','seconds','kind','episodes','createdBy','createdAt','archived'])
+        && d.keys().hasOnly(['title','date','seconds','kind','episodes','createdBy','createdAt','archived'])
+        && d.title is string && d.title.size() > 0 && d.title.size() <= 250
+        && d.date is string && d.date.size() <= 20
+        && (d.seconds == null || (d.seconds is int && d.seconds > 0 && d.seconds <= 100000000))
+        && d.kind in ['movie','series'] && d.episodes is int && d.episodes > 0 && d.episodes <= 1000
+        && d.createdBy is string && d.createdAt is timestamp && d.archived is bool;
+    }
+    match /titles/{id} {
+      allow read: if approved();
+      allow create: if manage() && titleShape(request.resource.data)
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.createdAt == request.time && !request.resource.data.archived;
+      // Ordinary managers can add but cannot edit or remove existing titles.
+      allow update: if titleShape(request.resource.data)
+        && request.resource.data.createdBy == resource.data.createdBy
+        && request.resource.data.createdAt == resource.data.createdAt
+        && (owner() || (fullManage() && request.resource.data.archived == resource.data.archived));
+      // Archiving is owner-only and reversible. Hard deletion is never a browser operation.
+      allow delete: if false;
+    }
+    match /deletionRequests/{id} {
+      allow read: if fullManage();
+      allow create: if fullManage()
+        && request.resource.data.keys().hasOnly(['titleId','reason','requestedBy','createdAt','status'])
+        && request.resource.data.titleId is string
+        && exists(/databases/$(database)/documents/titles/$(request.resource.data.titleId))
+        && request.resource.data.reason is string && request.resource.data.reason.size() > 0
+        && request.resource.data.reason.size() <= 1000
+        && request.resource.data.requestedBy == request.auth.uid
+        && request.resource.data.createdAt == request.time && request.resource.data.status == 'pending';
+      allow update: if owner()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        && resource.data.status == 'pending'
+        && request.resource.data.status in ['approved','rejected']
+        && (request.resource.data.status == 'rejected'
+          || getAfter(/databases/$(database)/documents/titles/$(resource.data.titleId)).data.archived == true);
+      allow delete: if false;
+    }
+    match /settings/basic {
+      allow read: if approved();
+      allow create, update: if manage()
+        && request.resource.data.keys().hasOnly(['announcement','defaultTheme','updatedAt','updatedBy'])
+        && request.resource.data.announcement is string && request.resource.data.announcement.size() <= 1000
+        && request.resource.data.defaultTheme in ['dark','light','system']
+        && request.resource.data.updatedAt == request.time
+        && request.resource.data.updatedBy == request.auth.uid;
+      allow delete: if false;
+    }
+    match /settings/admin {
+      allow read, write: if owner();
+    }
+    match /{document=**} { allow read, write: if false; }
+  }
+}

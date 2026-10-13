@@ -2,11 +2,11 @@
 globalThis.MarvelLists=(()=>{
  const MAX=5,KEY='marvel_list_',DRAFT='marvel_list_draft',ACTIVE='marvel_list_active';
  const pack=v=>btoa(String.fromCharCode(...new TextEncoder().encode(JSON.stringify(v))));
- function read(key){try{const s=document.cookie.split('; ').find(s=>s.startsWith(key+'='));return s?JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(s.slice(key.length+1).replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0)))):null}catch{return null}}
- function write(key,v){const s=pack(v);if(s.length>3800)throw Error('This list is too large for browser storage.');document.cookie=key+'='+s+'; Max-Age=34560000; Path=/; SameSite=Lax'+(location.protocol==='https:'?'; Secure':'');if(!document.cookie.split('; ').includes(key+'='+s))throw Error('Browser storage is blocked. Your changes were not saved.');}
- function remove(key){document.cookie=key+'=; Max-Age=0; Path=/; SameSite=Lax';}
+ function read(key){return MarvelCookies.read(key)}
+ function write(key,v){MarvelCookies.write(key,v)}
+ function remove(key){MarvelCookies.remove(key)}
  function validate(v,items){if(!v||typeof v.name!=='string'||!v.name.trim()||v.name.length>40||!Array.isArray(v.ids)||v.ids.length>items.length||new Set(v.ids).size!==v.ids.length||v.ids.some(id=>!items.some(x=>x.id===id)))throw Error('Invalid personal list');return{name:v.name.trim(),ids:[...v.ids]};}
- function date(s){if(!/^\d{2}\/\d{2}\/\d{4}$/.test(s||''))return Infinity;const[d,m,y]=s.split('/').map(Number),v=Date.UTC(y,m-1,d),t=new Date(v);return t.getUTCDate()===d&&t.getUTCMonth()===m-1?v:Infinity;}
+ function date(s){if(/^\d{4}$/.test(s||''))return Date.UTC(Number(s),11,31,23,59,59);if(!/^\d{2}\/\d{2}\/\d{4}$/.test(s||''))return Infinity;const[d,m,y]=s.split('/').map(Number),v=Date.UTC(y,m-1,d),t=new Date(v);return t.getUTCDate()===d&&t.getUTCMonth()===m-1?v:Infinity;}
  function ordered(items){return [...items].sort((a,b)=>date(a.date)-date(b.date)||a.order-b.order);}
  function all(items){return Array.from({length:MAX},(_,slot)=>{try{const v=validate(read(KEY+slot),items);return{...v,slot}}catch{return null}}).filter(Boolean);}
  function active(items){const slot=read(ACTIVE);return all(items).find(x=>x.slot===slot)||null;}

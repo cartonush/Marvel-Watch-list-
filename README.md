@@ -89,3 +89,10 @@ My lists (lists.html): named swipe builder, right to add, left to pass, up to de
 ## Version 1.5.1
 
 Fixed swipe movement and scroll anchoring in the personal-list builder. Vertical swipes in either direction defer the current title. After a swipe replaces the card, the page restores its previous scroll position.
+
+
+## Wikipedia catalog expansion — 2026-10-13
+
+All MCU (based on Wikipedia): 118 entries. All Marvel: 344 entries, 234 newly added. See dist/catalog-additions.txt for scope, sources, additions and reused titles. Existing IDs/order, runtime and watch URLs are retained. Historical release-date corrections are recorded in originalDate/dateSource. Built-in collections are selectable on home and My Lists. Large saved lists use verified chunked cookies. The displayed version remains 1.5.1 until the owner requests a version advance.
+
+Run `node validate.mjs` for the legacy 1.5.1 regression fixture, then `node test-catalog.mjs` for expanded catalog/storage migration. Browser QA is unavailable in this session. `backend/` contains a prepared Firebase permissions foundation; it is NOT an active account system. Firebase configuration, owner identity, SDK/admin UI integration and emulator authorization checks are required before enabling account restrictions.
