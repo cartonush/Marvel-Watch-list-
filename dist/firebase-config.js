@@ -8,5 +8,5 @@ export const firebaseConfig = {
   appId: '1:523997263963:web:71c2f440596bac1a37277e',
   measurementId: 'G-LH0VN6F3JZ'
 };
-// Enable only after the matching Firestore rules and owner bootstrap are active.
-export const firebaseEnabled = false;
+// Firestore rules were published by the project owner; new accounts remain pending.
+export const firebaseEnabled = true;
