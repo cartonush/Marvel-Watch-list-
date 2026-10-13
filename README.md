@@ -84,3 +84,8 @@ Live countdown to the owner-specified December 18, 2026 at 20:00 Israel time. Da
 ## Version 1.5
 
 My lists (lists.html): named swipe builder, right to add, left to pass, up to defer. Deferred cards return after undecided cards. Up to five device-local cookie lists and one resumable draft. Saved lists use global release-date order; the home catalogue groups them by original phase while Next to Watch uses release order. Unknown dates sort last. Existing watched progress is shared. Full backup includes saved lists. Classifications use existing saved RoadToDoomsday metadata.
+
+
+## Version 1.5.1
+
+Fixed swipe movement and scroll anchoring in the personal-list builder. Vertical swipes in either direction defer the current title. After a swipe replaces the card, the page restores its previous scroll position.
