@@ -120,3 +120,24 @@ html,body{max-width:100%;overflow-x:clip}
  .route-actions .text-button{white-space:normal;text-align:center;padding:9px 6px;border:1px solid var(--line);border-radius:6px}
  .route-actions .secondary{grid-column:1/-1;width:100%}
 }
+
+/* Account menu, inline management route, and site friendships. */
+.account-menu{position:fixed;z-index:90;display:grid;gap:4px;width:min(235px,calc(100vw - 20px));padding:10px;background:var(--panel);border:1px solid var(--line);box-shadow:0 18px 45px #0008;border-radius:12px;font-size:13px}
+.account-menu strong{padding:9px 10px;color:var(--muted);overflow-wrap:anywhere}
+.account-menu button,.account-menu a{width:100%;display:block;text-align:left;padding:11px 10px;border-radius:7px;background:transparent;color:inherit}
+.account-menu button:hover,.account-menu a:hover{background:color-mix(in srgb,var(--red) 14%,transparent)}
+main.management-active > :not(#management-view){display:none!important}
+.friends-main{margin:0 auto;padding:42px 22px 100px;max-width:850px}
+.friends-main h1{font-size:clamp(30px,5vw,48px);margin:12px 0}
+.friends-main>p{color:var(--muted);line-height:1.7}
+.friend-request-form{display:grid;gap:9px;margin-top:16px}
+.friend-request-form>div{display:flex;gap:10px;flex-wrap:wrap}
+.friend-request-form input{min-width:160px;flex:1;background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:12px;color:inherit}
+.friend-heading,.friend-entry{display:flex;justify-content:space-between;align-items:center;gap:15px}
+.friend-entry{border-top:1px solid var(--line);padding:17px 0}
+.friend-entry strong,.friend-entry small{display:block;overflow-wrap:anywhere}
+.friend-entry small{color:var(--muted);margin-top:6px;line-height:1.5}
+.friend-entry small a{color:var(--red);text-decoration:underline}
+#friend-message{min-height:20px;color:var(--red)}
+.friends-page .topbar .top-actions,.lists-page .topbar .top-actions{gap:12px}
+@media(max-width:700px){.friends-page .topbar,.lists-page .topbar{display:flex;flex-wrap:wrap;gap:8px;padding:10px 12px}.friends-page .topbar .top-actions,.lists-page .topbar .top-actions{margin-left:auto}.friends-page .topbar .secondary,.lists-page .topbar .secondary{font-size:10px;padding:8px}.friends-page .topbar .profile-button>span:not(:first-child),.lists-page .topbar .profile-button>span:not(:first-child){display:none}.friend-entry{align-items:flex-start;flex-wrap:wrap}.friend-entry>div:first-child{min-width:0;flex:1}.friends-main{padding-top:25px}}

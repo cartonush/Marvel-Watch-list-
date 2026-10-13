@@ -60,6 +60,58 @@ service cloud.firestore {
       // Disable accounts instead of removing their audit identity.
       allow delete: if false;
     }
+    match /handles/{name} {
+      allow get: if approved();
+      allow list: if false;
+      allow create: if approved() && name == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.username
+        && request.resource.data.keys().hasOnly(['uid','username','createdAt'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.username == name && request.resource.data.createdAt == request.time;
+      allow update, delete: if false;
+    }
+    function activeUser(uid) {
+      return get(/databases/$(database)/documents/users/$(uid)).data.status == 'approved'
+        && get(/databases/$(database)/documents/users/$(uid)).data.view == true;
+    }
+    function validPair(id,d) {
+      return d.keys().hasOnly(['a','b','aName','bName','requestedBy','status','createdAt','updatedAt'])
+        && d.a is string && d.b is string && d.a != d.b
+        && (id == d.a + '_' + d.b || id == d.b + '_' + d.a)
+        && d.requestedBy in [d.a,d.b]
+        && d.aName == get(/databases/$(database)/documents/users/$(d.a)).data.username
+        && d.bName == get(/databases/$(database)/documents/users/$(d.b)).data.username;
+    }
+    match /friendships/{id} {
+      allow get, list: if approved() && (resource.data.a == request.auth.uid || resource.data.b == request.auth.uid);
+      allow create: if approved() && validPair(id,request.resource.data)
+        && request.resource.data.requestedBy == request.auth.uid
+        && request.resource.data.status == 'pending'
+        && request.resource.data.createdAt == request.time && request.resource.data.updatedAt == request.time
+        && activeUser(request.resource.data.a) && activeUser(request.resource.data.b);
+      allow update: if approved() && validPair(id,request.resource.data)
+        && resource.data.status == 'pending' && request.resource.data.status == 'accepted'
+        && resource.data.requestedBy != request.auth.uid
+        && request.auth.uid in [resource.data.a,resource.data.b]
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedAt'])
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if approved() && request.auth.uid in [resource.data.a,resource.data.b];
+    }
+    function acceptedPair(other) {
+      return (exists(/databases/$(database)/documents/friendships/$(request.auth.uid + '_' + other))
+        && get(/databases/$(database)/documents/friendships/$(request.auth.uid + '_' + other)).data.status == 'accepted')
+        || (exists(/databases/$(database)/documents/friendships/$(other + '_' + request.auth.uid))
+        && get(/databases/$(database)/documents/friendships/$(other + '_' + request.auth.uid)).data.status == 'accepted');
+    }
+    match /friendProgress/{uid} {
+      allow get: if approved() && (request.auth.uid == uid || acceptedPair(uid));
+      allow list: if false;
+      allow create, update: if approved() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['username','watched','updatedAt'])
+        && request.resource.data.username == get(/databases/$(database)/documents/users/$(uid)).data.username
+        && request.resource.data.watched is map && request.resource.data.watched.size() <= 1000
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if approved() && request.auth.uid == uid;
+    }
     function titleShape(d) {
       return d.keys().hasAll(['title','date','seconds','kind','episodes','createdBy','createdAt','archived','group','collections','url','poster','priority','reason'])
         && d.keys().hasOnly(['title','date','seconds','kind','episodes','createdBy','createdAt','archived','group','collections','url','poster','priority','reason'])

@@ -2,7 +2,7 @@
 import {readFileSync} from 'node:fs';
 import {test, before, after} from 'node:test';
 import {initializeTestEnvironment, assertFails, assertSucceeds} from '@firebase/rules-unit-testing';
-import {doc, setDoc, getDoc, updateDoc, deleteDoc, serverTimestamp, writeBatch} from 'firebase/firestore';
+import {doc, setDoc, getDoc, getDocs, collection, query, where, updateDoc, deleteDoc, serverTimestamp, writeBatch} from 'firebase/firestore';
 let env;
 const title=(name,by='owner')=>({title:name,date:'2026',seconds:null,kind:'movie',episodes:1,createdAt:new Date(),createdBy:by,archived:false,group:'extra',collections:['marvel'],url:'https://en.wikipedia.org/',poster:'',priority:'later',reason:'Test'});
 const profile=(username,flags={})=>({username,email:username+'@users.marvel-list.invalid',status:'approved',view:true,manage:false,Fmanage:false,createdAt:new Date(),updatedAt:new Date(),...flags});
@@ -60,4 +60,32 @@ test('basic settings cannot carry authorization settings',async()=>{
  await assertSucceeds(setDoc(doc(db('manager'),'settings/basic'),base));
  await assertFails(setDoc(doc(db('manager'),'settings/basic'),{...base,owner:'manager'}));
  await assertFails(setDoc(doc(db('manager'),'settings/admin'),{registrationOpen:true}));
+});
+test('only approved accounts can register their own discoverable username',async()=>{
+ const own={uid:'viewer',username:'viewer',createdAt:serverTimestamp()};
+ await assertFails(setDoc(doc(db('viewer'),'handles/other'),own));
+ await assertFails(setDoc(doc(db('pending'),'handles/pending'),{...own,uid:'pending',username:'pending'}));
+ await assertSucceeds(setDoc(doc(db('viewer'),'handles/viewer'),own));
+ await assertFails(updateDoc(doc(db('viewer'),'handles/viewer'),{uid:'owner'}));
+ await assertSucceeds(getDoc(doc(db('manager'),'handles/viewer')));
+});
+test('friend requests require approval; progress stays private until accepted',async()=>{
+ const d=db('viewer'),other=db('manager'),ref=doc(d,'friendships/manager_viewer');
+ const request={a:'manager',b:'viewer',aName:'manager',bName:'viewer',requestedBy:'viewer',status:'pending',createdAt:serverTimestamp(),updatedAt:serverTimestamp()};
+ await assertFails(setDoc(doc(db('pending'),'friendships/pending_viewer'),{...request,a:'pending',aName:'pending',requestedBy:'pending'}));
+ await assertFails(setDoc(ref,{...request,requestedBy:'manager'}));
+ await assertSucceeds(setDoc(ref,request));
+ await assertSucceeds(getDocs(query(collection(d,'friendships'),where('b','==','viewer'))));
+ await assertSucceeds(getDocs(query(collection(other,'friendships'),where('a','==','manager'))));
+ await assertFails(getDocs(collection(db('admin'),'friendships')));
+ const progress=doc(other,'friendProgress/manager');
+ await assertSucceeds(setDoc(progress,{username:'manager',watched:{m2:1},updatedAt:serverTimestamp()}));
+ await assertFails(getDoc(doc(d,'friendProgress/manager')));
+ await assertFails(updateDoc(ref,{status:'accepted',updatedAt:serverTimestamp()}));
+ await assertSucceeds(updateDoc(doc(other,'friendships/manager_viewer'),{status:'accepted',updatedAt:serverTimestamp()}));
+ await assertSucceeds(getDoc(doc(d,'friendProgress/manager')));
+ await assertFails(getDoc(doc(db('admin'),'friendProgress/manager')));
+ await assertFails(updateDoc(doc(d,'friendProgress/manager'),{watched:{m2:0},updatedAt:serverTimestamp()}));
+ await assertSucceeds(deleteDoc(ref));
+ await assertFails(getDoc(doc(d,'friendProgress/manager')));
 });

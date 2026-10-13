@@ -25,3 +25,9 @@ Registrants create their own pending profile with flags false. The username neve
 5. Run authorization tests locally from `backend/`: `npm install` and `npx firebase emulators:exec --only firestore --project demo-marvel-access 'npm run test:rules'`.
 
 The old real-email login account does not automatically migrate to username authentication. If one exists, sign out and register a username, then bootstrap that new UID. A public static `data.json` and Git history remain publicly retrievable even behind the login overlay. Store truly private future data in protected Firestore collections.
+
+## Version 1.5.2 friendships
+
+Publish the updated `backend/firestore.rules` from this version before sending requests. Approved users get a username handle under `handles/{username}` when they open the updated site. A sender searches that exact handle, then creates a pending `friendships/{pair}` record. Only the other participant can accept it. Either participant can remove a request or friendship. There is no friend count limit.
+
+The watchlist saves progress locally and publishes completed title counts to `friendProgress/{uid}`. Only the owner and accepted friends can read this record. Opening the watchlist updates the shared copy; there is no background cross-device sync. The friend page shows incoming requests, sent requests, accepted friends, and an earliest common unwatched movie suggestion. Existing code-based snapshots remain readable in old backups but are no longer used for new friendship requests.

@@ -4,18 +4,15 @@ let api,account,ownerId,allTitles=[];
 const note=s=>$('#admin-message').textContent=s;
 const authorized=()=>account&&(account.manage||account.Fmanage);
 const management=$('#management-view'),main=document.querySelector('main');
-let savedVisibility=null;
 function showManagement(){
   const active=location.hash==='#manage'&&!!authorized();
-  if(location.hash==='#manage'&&!authorized())history.replaceState(null,'',location.pathname+location.search);
-  if(active&&!savedVisibility){savedVisibility=new Map([...main.children].filter(node=>node!==management).map(node=>[node,node.hidden]));for(const node of savedVisibility.keys())node.hidden=true;}
-  if(!active&&savedVisibility){for(const [node,hidden] of savedVisibility)node.hidden=hidden;savedVisibility=null;}
+  main.classList.toggle('management-active',active);
   management.hidden=!active;$('#manage-nav').classList.toggle('active',active);
-  if(active)window.scrollTo({top:0,behavior:'instant'});
+  if(active)window.scrollTo(0,0);
 }
-$('#manage-nav').onclick=()=>{if(!authorized())return;location.hash='manage';showManagement();if($('#menu').getAttribute('aria-expanded')==='true')$('#menu').click()};
+$('#manage-nav').onclick=()=>{if(!authorized()){note('Your account does not have management access.');return}history.pushState(null,'','#manage');showManagement();if($('#menu').getAttribute('aria-expanded')==='true')$('#menu').click()};
 $('#leave-management').onclick=()=>{history.pushState(null,'',location.pathname+location.search);showManagement()};
-window.addEventListener('hashchange',showManagement);
+window.addEventListener('hashchange',showManagement);window.addEventListener('popstate',showManagement);
 document.querySelector('#sidebar').addEventListener('click',e=>{if(e.target.closest('#manage-nav'))return;if(e.target.closest('[data-group],[data-status],[data-settings],#friends-nav')){history.replaceState(null,'',location.pathname+location.search);showManagement()}},true);
 window.addEventListener('marvel-access-change',()=>{const was=!!authorized();account=api?.account||null;if(!authorized()){$('#admin-content').hidden=true;showManagement()}else if(!was)load().catch(()=>note('Could not load management data.'))});
 async function load(){
@@ -29,10 +26,10 @@ async function load(){
     $('#user-section').hidden=false;$('#title-section').hidden=false;
     try{const owner=await f.getDoc(f.doc(db,'system/owner'));ownerId=owner.data()?.uid;}catch{ownerId=null;}
     $('#management-role').textContent=ownerId===api.auth.currentUser.uid?'Owner': 'Senior manager';
-    await Promise.all([users(),titles(),requests()]);
+    const results=await Promise.allSettled([users(),titles(),requests()]);
+    if(results.some(r=>r.status==='rejected'))note('Management opened. Some data could not load; check the published Firestore rules and account role.');
   }else $('#management-role').textContent='Manager';
-  const settings=await f.getDoc(f.doc(db,'settings/basic'));
-  if(settings.exists()){$('#basic-settings').elements.announcement.value=settings.data().announcement||'';$('#basic-settings').elements.defaultTheme.value=settings.data().defaultTheme||'dark';}
+  try{const settings=await f.getDoc(f.doc(db,'settings/basic'));if(settings.exists()){$('#basic-settings').elements.announcement.value=settings.data().announcement||'';$('#basic-settings').elements.defaultTheme.value=settings.data().defaultTheme||'dark';}}catch{note('Management opened, but basic settings could not load.');}
 }
 async function users(){
   const {db,firestore:f}=api,docs=await f.getDocs(f.collection(db,'users'));

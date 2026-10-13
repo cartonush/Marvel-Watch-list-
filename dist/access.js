@@ -2,8 +2,8 @@ import {firebaseConfig,firebaseEnabled} from './firebase-config.js';
 
 if (firebaseEnabled && firebaseConfig) {
   const [{initializeApp},{getAuth,onAuthStateChanged,createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,signOut},{getFirestore,doc,setDoc,getDoc,getDocs,collection,addDoc,updateDoc,
-    runTransaction,serverTimestamp}] = await Promise.all([
+    signInWithEmailAndPassword,signOut},{getFirestore,doc,setDoc,getDoc,getDocs,collection,addDoc,updateDoc,deleteDoc,
+    query,where,runTransaction,serverTimestamp}] = await Promise.all([
     import('https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js'),
     import('https://www.gstatic.com/firebasejs/13.0.0/firebase-auth.js'),
     import('https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js')
@@ -46,17 +46,24 @@ if (firebaseEnabled && firebaseConfig) {
     if(manageNav)manageNav.hidden=!approved||!(current.manage||current.Fmanage);
     if(approved){
       overlay.hidden=true;
-      document.getElementById('account-actions')?.remove();
-      const actions=document.createElement('div');actions.id='account-actions';
-      actions.innerHTML=`<span class="subtle">${esc(current.username||usernameOf(user))}</span>${(current.manage||current.Fmanage)&&!manageNav?'<a href="index.html#manage" class="secondary">Manage site</a>':''}<button type="button" class="secondary" id="sign-out">Sign out</button>`;
-      document.querySelector('.top-actions,.topbar')?.append(actions);
+      let button=document.getElementById('profile-button');
+      if(!button){button=document.createElement('button');button.id='profile-button';button.className='profile-button';button.type='button';document.querySelector('.top-actions,.topbar')?.append(button)}
+      button.innerHTML=`<span id="avatar">${esc((current.username||usernameOf(user))[0].toUpperCase())}</span><span id="profile-label">${esc(current.username||usernameOf(user))}</span><span aria-hidden="true">⌄</span>`;
+      button.setAttribute('aria-label','Account menu');button.setAttribute('aria-expanded','false');
+      let actions=document.getElementById('account-actions');
+      if(!actions){actions=document.createElement('div');actions.id='account-actions';actions.className='account-menu';actions.hidden=true;document.body.append(actions)}
+      actions.innerHTML=`<strong>@${esc(current.username||usernameOf(user))}</strong>${document.getElementById('modal')?'<button type="button" data-open-profile>My watch profile</button>':''}${(current.manage||current.Fmanage)&&!manageNav?'<a href="index.html#manage">Manage site</a>':''}<button type="button" id="sign-out">Sign out</button>`;
+      button.onclick=()=>{actions.hidden=!actions.hidden;button.setAttribute('aria-expanded',String(!actions.hidden));if(!actions.hidden){const r=button.getBoundingClientRect();actions.style.top=`${r.bottom+8}px`;actions.style.right=`${Math.max(10,innerWidth-r.right)}px`}};
       actions.querySelector('#sign-out').onclick=()=>signOut(auth);
+      actions.querySelector('[data-open-profile]')?.addEventListener('click',()=>{actions.hidden=true;button.setAttribute('aria-expanded','false');document.dispatchEvent(new Event('marvel-open-profile'))});
+      const handleRef=doc(db,'handles',current.username||usernameOf(user));
+      getDoc(handleRef).then(s=>s.exists()?null:setDoc(handleRef,{uid:user.uid,username:current.username||usernameOf(user),createdAt:serverTimestamp()})).catch(()=>{});
       window.dispatchEvent(new Event('marvel-access-change'));
       resolveReady();
       return;
     }
     window.dispatchEvent(new Event('marvel-access-change'));
-    overlay.hidden=false;
+    overlay.hidden=false;document.getElementById('account-actions')?.remove();
     if(!user){
       overlay.innerHTML=`<div class="access-panel"><div class="eyebrow">MARVEL LIST</div><h1>Sign in to your watchlist</h1><p>Choose a username and password. New accounts wait for approval before viewing the collection.</p><form id="access-form"><label>Username<input id="access-username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required minlength="3" maxlength="24" pattern="[A-Za-z][A-Za-z0-9_]{2,23}"></label><label>Password<input id="access-password" type="password" autocomplete="current-password" required minlength="8"></label><div class="modal-actions"><button class="primary" name="mode" value="login">Sign in</button><button class="secondary" name="mode" value="register">Register</button></div></form><p class="subtle">Forgot your password? Ask the site owner to help reset it.</p><p id="access-message" role="status">${esc(message)}</p></div>`;
       overlay.querySelector('#access-form').onsubmit=async e=>{
@@ -129,5 +136,7 @@ if (firebaseEnabled && firebaseConfig) {
     return base;
   }
   window.MarvelAccess={ready,catalog,enrich,get account(){return current},auth,db,
-    firestore:{doc,getDoc,getDocs,collection,addDoc,updateDoc,runTransaction,serverTimestamp,setDoc}};
+    firestore:{doc,getDoc,getDocs,collection,addDoc,updateDoc,deleteDoc,query,where,runTransaction,serverTimestamp,setDoc}};
+  document.addEventListener('click',e=>{const menu=document.getElementById('account-actions'),button=document.getElementById('profile-button');if(menu&&!menu.hidden&&!menu.contains(e.target)&&!button?.contains(e.target)){menu.hidden=true;button?.setAttribute('aria-expanded','false')}});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){const menu=document.getElementById('account-actions');if(menu)menu.hidden=true;document.getElementById('profile-button')?.setAttribute('aria-expanded','false')}});
 }
