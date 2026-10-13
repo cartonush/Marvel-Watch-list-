@@ -3,25 +3,41 @@ const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>
 let api,account,ownerId,allTitles=[];
 const note=s=>$('#admin-message').textContent=s;
 const authorized=()=>account&&(account.manage||account.Fmanage);
+const management=$('#management-view'),main=document.querySelector('main');
+let savedVisibility=null;
+function showManagement(){
+  const active=location.hash==='#manage'&&!!authorized();
+  if(location.hash==='#manage'&&!authorized())history.replaceState(null,'',location.pathname+location.search);
+  if(active&&!savedVisibility){savedVisibility=new Map([...main.children].filter(node=>node!==management).map(node=>[node,node.hidden]));for(const node of savedVisibility.keys())node.hidden=true;}
+  if(!active&&savedVisibility){for(const [node,hidden] of savedVisibility)node.hidden=hidden;savedVisibility=null;}
+  management.hidden=!active;$('#manage-nav').classList.toggle('active',active);
+  if(active)window.scrollTo({top:0,behavior:'instant'});
+}
+$('#manage-nav').onclick=()=>{if(!authorized())return;location.hash='manage';showManagement();if($('#menu').getAttribute('aria-expanded')==='true')$('#menu').click()};
+$('#leave-management').onclick=()=>{history.pushState(null,'',location.pathname+location.search);showManagement()};
+window.addEventListener('hashchange',showManagement);
+document.querySelector('#sidebar').addEventListener('click',e=>{if(e.target.closest('#manage-nav'))return;if(e.target.closest('[data-group],[data-status],[data-settings],#friends-nav')){history.replaceState(null,'',location.pathname+location.search);showManagement()}},true);
+window.addEventListener('marvel-access-change',()=>{const was=!!authorized();account=api?.account||null;if(!authorized()){$('#admin-content').hidden=true;showManagement()}else if(!was)load().catch(()=>note('Could not load management data.'))});
 async function load(){
   api=window.MarvelAccess;
   if(!api){note('Account management becomes available after Firebase is configured.');return}
   await api.ready;account=api.account;
-  if(!authorized()){note('Your account can view the collection but cannot manage it.');return}
-  $('#admin-content').hidden=false;note('Management access is ready.');
+  if(!authorized()){showManagement();return}
+  $('#admin-content').hidden=false;showManagement();note('Management access is ready.');
   const {db,firestore:f}=api;
   if(account.Fmanage){
     $('#user-section').hidden=false;$('#title-section').hidden=false;
-    const owner=await f.getDoc(f.doc(db,'system/owner'));ownerId=owner.data()?.uid;
+    try{const owner=await f.getDoc(f.doc(db,'system/owner'));ownerId=owner.data()?.uid;}catch{ownerId=null;}
+    $('#management-role').textContent=ownerId===api.auth.currentUser.uid?'Owner': 'Senior manager';
     await Promise.all([users(),titles(),requests()]);
-  }
+  }else $('#management-role').textContent='Manager';
   const settings=await f.getDoc(f.doc(db,'settings/basic'));
   if(settings.exists()){$('#basic-settings').elements.announcement.value=settings.data().announcement||'';$('#basic-settings').elements.defaultTheme.value=settings.data().defaultTheme||'dark';}
 }
 async function users(){
   const {db,firestore:f}=api,docs=await f.getDocs(f.collection(db,'users'));
   $('#admin-users').innerHTML=docs.docs.map(row=>{const u=row.data(),id=row.id,isOwner=id===ownerId,isAdmin=u.manage||u.Fmanage;
-    return `<div class="admin-row"><div><strong>${esc(u.username||u.email)}</strong><small>${isOwner?'Owner':esc(u.status)} · ${u.Fmanage?'Full manager':u.manage?'Manager':'Viewer'}</small></div><div class="list-buttons">${!isOwner&&!isAdmin?u.status==='pending'||u.status==='disabled'?`<button class="secondary" data-approve="${esc(id)}">Approve view</button>`:`<button class="secondary" data-disable="${esc(id)}">Disable</button>`:''}${api.auth.currentUser.uid===ownerId&&!isOwner?`<select data-role="${esc(id)}" aria-label="Role for ${esc(u.username||u.email)}"><option value="view" ${!u.manage&&!u.Fmanage?'selected':''}>Viewer</option><option value="manage" ${u.manage&&!u.Fmanage?'selected':''}>Manage</option><option value="Fmanage" ${u.Fmanage?'selected':''}>Fmanage</option></select>`:''}</div></div>`;
+    return `<div class="admin-row"><div><strong>${esc(u.username||u.email)}</strong><small>${isOwner?'Owner':esc(u.status)} · ${u.Fmanage?'Senior manager':u.manage?'Manager':'Viewer'}</small></div><div class="list-buttons">${!isOwner&&!isAdmin?u.status==='pending'||u.status==='disabled'?`<button class="secondary" data-approve="${esc(id)}">Approve view</button>`:`<button class="secondary" data-disable="${esc(id)}">Disable</button>`:''}${api.auth.currentUser.uid===ownerId&&!isOwner?`<select data-role="${esc(id)}" aria-label="Role for ${esc(u.username||u.email)}"><option value="view" ${!u.manage&&!u.Fmanage?'selected':''}>Viewer</option><option value="manage" ${u.manage&&!u.Fmanage?'selected':''}>Manager</option><option value="Fmanage" ${u.Fmanage?'selected':''}>Senior manager</option></select>`:''}</div></div>`;
   }).join('');
 }
 async function titles(){
@@ -45,9 +61,9 @@ $('#add-title').onsubmit=async e=>{e.preventDefault();if(!authorized())return;co
 $('#basic-settings').onsubmit=async e=>{e.preventDefault();if(!authorized())return;const f=api.firestore,v=new FormData(e.currentTarget);
   try{await f.setDoc(f.doc(api.db,'settings/basic'),{announcement:String(v.get('announcement')).slice(0,1000),defaultTheme:String(v.get('defaultTheme')),updatedAt:f.serverTimestamp(),updatedBy:api.auth.currentUser.uid});note('Settings saved.')}catch{note('Could not save settings.')}};
 $('#title-search').oninput=renderTitles;
-document.addEventListener('change',async e=>{const id=e.target.dataset?.role;if(!id||api.auth.currentUser.uid!==ownerId)return;const f=api.firestore,value=e.target.value;
+document.addEventListener('change',async e=>{const id=e.target.dataset?.role;if(!id||!authorized()||api.auth.currentUser.uid!==ownerId)return;const f=api.firestore,value=e.target.value;
   try{await f.updateDoc(f.doc(api.db,'users',id),{manage:value==='manage',Fmanage:value==='Fmanage',view:true,status:'approved',updatedAt:f.serverTimestamp()});note('Role updated.');await users()}catch{note('Could not update the role.')}});
-document.addEventListener('click',async e=>{const d=e.target.closest('button')?.dataset;if(!d||!api)return;const f=api.firestore;
+document.addEventListener('click',async e=>{const d=e.target.closest('#management-view button')?.dataset;if(!d||!api||!authorized())return;const f=api.firestore;
   try{
     if(d.approve||d.disable){await f.updateDoc(f.doc(api.db,'users',d.approve||d.disable),{status:d.approve?'approved':'disabled',view:!!d.approve,updatedAt:f.serverTimestamp()});await users();note('User access updated.');}
     if(d.edit){const item=allTitles.find(x=>x.id===d.edit);if(!item)return;const title=prompt('Title',item.title);if(!title?.trim())return;await f.updateDoc(f.doc(api.db,'titles',item.id),{title:title.trim().slice(0,250)});await titles();note('Title updated.');}

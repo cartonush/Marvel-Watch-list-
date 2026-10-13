@@ -42,16 +42,20 @@ if (firebaseEnabled && firebaseConfig) {
     const user=auth.currentUser;
     const approved=!!current&&current.status==='approved'&&current.view&&!!usernameOf(user);
     document.documentElement.classList.toggle('access-locked',!approved);
+    const manageNav=document.getElementById('manage-nav');
+    if(manageNav)manageNav.hidden=!approved||!(current.manage||current.Fmanage);
     if(approved){
       overlay.hidden=true;
       document.getElementById('account-actions')?.remove();
       const actions=document.createElement('div');actions.id='account-actions';
-      actions.innerHTML=`<span class="subtle">${esc(current.username||usernameOf(user))}</span>${current.manage||current.Fmanage?'<a href="admin.html" class="secondary">Manage site</a>':''}<button type="button" class="secondary" id="sign-out">Sign out</button>`;
+      actions.innerHTML=`<span class="subtle">${esc(current.username||usernameOf(user))}</span>${(current.manage||current.Fmanage)&&!manageNav?'<a href="index.html#manage" class="secondary">Manage site</a>':''}<button type="button" class="secondary" id="sign-out">Sign out</button>`;
       document.querySelector('.top-actions,.topbar')?.append(actions);
       actions.querySelector('#sign-out').onclick=()=>signOut(auth);
+      window.dispatchEvent(new Event('marvel-access-change'));
       resolveReady();
       return;
     }
+    window.dispatchEvent(new Event('marvel-access-change'));
     overlay.hidden=false;
     if(!user){
       overlay.innerHTML=`<div class="access-panel"><div class="eyebrow">MARVEL LIST</div><h1>Sign in to your watchlist</h1><p>Choose a username and password. New accounts wait for approval before viewing the collection.</p><form id="access-form"><label>Username<input id="access-username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required minlength="3" maxlength="24" pattern="[A-Za-z][A-Za-z0-9_]{2,23}"></label><label>Password<input id="access-password" type="password" autocomplete="current-password" required minlength="8"></label><div class="modal-actions"><button class="primary" name="mode" value="login">Sign in</button><button class="secondary" name="mode" value="register">Register</button></div></form><p class="subtle">Forgot your password? Ask the site owner to help reset it.</p><p id="access-message" role="status">${esc(message)}</p></div>`;
