@@ -1,4 +1,4 @@
-# Account access: prepared, NOT activated
+# Account access: Firebase project configured, NOT activated
 
 The current public GitHub Pages website remains a browser-local tracker. These rules and the owner bootstrap are a backend foundation, not an active login system. No users, passwords, private keys, service account files, or allowlists belong in the repository.
 
@@ -18,14 +18,14 @@ Passwords are managed by Firebase Authentication. User documents contain email, 
 
 ## Required before activation
 
-1. Owner supplies the Firebase project and confirms the owner email. Enable email/password Auth and Firestore with production rules. Register the actual GitHub Pages/custom domain in Auth's authorized domains.
+1. The owner supplied project `marvel-list-database` and confirmed `roisuissa6@gmail.com`. Enable email/password Auth and Firestore with production rules. Add the actual GitHub Pages/custom domain to Auth's authorized domains.
 2. Enable a strong password policy and email-enumeration protection. Set email verification and password recovery templates. Configure quotas/abuse monitoring; consider App Check before exposing registration publicly.
 3. Install Firebase Admin SDK only in the local operator environment. Use Application Default Credentials. Run `MARVEL_FIREBASE_PROJECT=... MARVEL_OWNER_EMAIL=... node bootstrap-owner.mjs` after the owner has registered and verified email. Do not paste service-account credentials into chat or commit them.
 4. In `backend/`, install dependencies with `npm install`; the authorization suite passed 8/8 checks using `npx firebase emulators:exec --only firestore 'npm run test:rules' --project demo-marvel-access` on 13 October 2026. Deploy `firestore.rules` to the real project before enabling the client. Rules are not yet deployed.
-5. Register the web app in Firebase and paste its public web configuration object into `dist/firebase-config.js` in place of `null`, then publish the site. This is a public client identifier, **not** a service-account key. The login/pending-approval/admin UI and live revocation are implemented but are intentionally dormant until this step. Personal watch progress stays local.
+5. The public Web App configuration is in `dist/firebase-config.js`. Once rules are deployed, set `firebaseEnabled` to `true` and publish the site. The login/pending-approval/admin UI and live revocation are intentionally dormant until this step. Personal watch progress stays local.
 6. With private Application Default Credentials on the operator's computer, run `MARVEL_FIREBASE_PROJECT=... node seed-catalog.mjs` from `backend/` to import all existing titles without replacing edits. The existing `dist/data.json` and old Git commits are public. A login overlay cannot make their contents private; protect any new truly private data in Firestore only.
 7. Test actual accounts in the real project: registration, email verification, viewer approval and revocation, Manage/Fmanage/Owner actions, password recovery, and the GitHub Pages/custom domain before inviting friends.
 
-There is no Firebase project or confirmed owner identity configured, so no login requirement is enabled. Do not turn on the web config before rules are deployed and the owner is bootstrapped. Never commit credentials, password hashes, service-account JSON, or private keys.
+The project identity is configured but no login requirement is enabled. Deploy rules first, then enable the login UI so the owner can register and verify their email; bootstrap the owner before inviting anyone else. Never commit credentials, password hashes, service-account JSON, or private keys.
 
 References: https://firebase.google.com/docs/firestore/security/rules-conditions · https://firebase.google.com/docs/auth/web/manage-users · https://firebase.google.com/docs/firestore/security/test-rules-emulator

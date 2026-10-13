@@ -1,6 +1,6 @@
-import {firebaseConfig} from './firebase-config.js';
+import {firebaseConfig,firebaseEnabled} from './firebase-config.js';
 
-if (firebaseConfig) {
+if (firebaseEnabled && firebaseConfig) {
   const [{initializeApp},{getAuth,onAuthStateChanged,createUserWithEmailAndPassword,
     signInWithEmailAndPassword,signOut,sendPasswordResetEmail,sendEmailVerification,
     reload},{getFirestore,doc,setDoc,getDoc,getDocs,collection,addDoc,updateDoc,

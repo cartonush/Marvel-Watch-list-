@@ -4,7 +4,7 @@ English, responsive, buildless Marvel watch tracker based on the user's Google S
 
 ## Deployment
 
-Static output is `dist/`. The tracker still works without a backend. An optional Firebase Authentication and Firestore integration is staged but disabled in `dist/firebase-config.js`; see `backend/README.md` before activation. Hosting identity is in `.openai/hosting.json`.
+Static output is `dist/`. The tracker still works without a backend. Firebase project `marvel-list-database` is configured, but account access stays disabled via `firebaseEnabled = false` in `dist/firebase-config.js` until rules and the owner account are ready. See `backend/README.md` before activation. Hosting identity is in `.openai/hosting.json`.
 
 ## Data
 
