@@ -18,6 +18,17 @@ if (firebaseEnabled && firebaseConfig) {
   document.body.append(overlay);
   document.documentElement.classList.add('access-locked');
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  async function ensurePendingProfile(user){
+    const ref=doc(db,'users',user.uid),existing=await getDoc(ref);
+    if(existing.exists())return;
+    try{
+      await setDoc(ref,{email:user.email,view:false,manage:false,Fmanage:false,
+        status:'pending',createdAt:serverTimestamp(),updatedAt:serverTimestamp()});
+    }catch(error){
+      // A second signed-in tab may have created the pending profile first.
+      if(!(await getDoc(ref)).exists())throw error;
+    }
+  }
   function render(message=''){
     const user=auth.currentUser;
     const approved=!!current&&current.status==='approved'&&current.view&&user?.emailVerified;
@@ -41,7 +52,6 @@ if (firebaseEnabled && firebaseConfig) {
         try{
           if(button?.value==='register'){
             const {user:created}=await createUserWithEmailAndPassword(auth,email,password);
-            await setDoc(doc(db,'users',created.uid),{email:created.email,view:false,manage:false,Fmanage:false,status:'pending',createdAt:serverTimestamp(),updatedAt:serverTimestamp()});
             await sendEmailVerification(created);
             render('Account created. Check your email, then wait for approval.');
           }else await signInWithEmailAndPassword(auth,email,password);
@@ -57,22 +67,30 @@ if (firebaseEnabled && firebaseConfig) {
     const pending=!current||current.status==='pending';
     overlay.innerHTML=`<div class="access-panel"><div class="eyebrow">MARVEL LIST</div><h1>${pending?'Approval pending':'Access unavailable'}</h1><p>${!user.emailVerified?'Verify your email address first. ':''}${pending?'A user manager must approve your account before the collection opens.':'This account does not have viewing access.'}</p><p class="subtle">Account ID: <code id="account-id">${esc(user.uid)}</code></p><p id="access-message" role="status">${esc(message)}</p><div class="modal-actions"><button class="secondary" id="copy-account-id">Copy account ID</button><button class="secondary" id="check-access">Check again</button><button class="secondary" id="verify-email">${user.emailVerified?'Email verified':'Send verification email'}</button><button class="secondary" id="sign-out">Sign out</button></div></div>`;
     overlay.querySelector('#copy-account-id').onclick=async()=>{try{await navigator.clipboard.writeText(user.uid);overlay.querySelector('#access-message').textContent='Account ID copied.'}catch{overlay.querySelector('#access-message').textContent='Select the account ID above to copy it.'}};
-    overlay.querySelector('#check-access').onclick=async()=>{try{await reload(auth.currentUser);await auth.currentUser.getIdToken(true);const snap=await getDoc(doc(db,'users',auth.currentUser.uid));current=snap.exists()?snap.data():null;render()}catch(err){render(friendlyError(err))}};
+    overlay.querySelector('#check-access').onclick=async()=>{try{await reload(auth.currentUser);await auth.currentUser.getIdToken(true);await ensurePendingProfile(auth.currentUser);const snap=await getDoc(doc(db,'users',auth.currentUser.uid));current=snap.exists()?snap.data():null;render()}catch(err){render(friendlyError(err))}};
     overlay.querySelector('#verify-email').onclick=async()=>{try{await sendEmailVerification(auth.currentUser);render('Verification email sent.')}catch(err){render(friendlyError(err))}};
     overlay.querySelector('#sign-out').onclick=()=>signOut(auth);
   }
   function friendlyError(error){
     if(error?.code==='auth/wrong-password'||error?.code==='auth/invalid-credential'||error?.code==='auth/user-not-found')return 'Invalid email or password.';
-    if(error?.code==='auth/email-already-in-use')return 'An account already uses this email.';
+    if(error?.code==='auth/email-already-in-use')return 'An account already uses this email. Choose Sign in instead.';
     if(error?.code==='auth/weak-password')return 'Choose a stronger password.';
+    if(error?.code==='auth/operation-not-allowed')return 'Email/password sign-in is disabled in Firebase Authentication.';
+    if(error?.code==='auth/unauthorized-domain')return 'This domain is not authorized in Firebase Authentication.';
+    if(error?.code==='auth/network-request-failed')return 'Could not reach Firebase. Check your connection and try again.';
+    if(error?.code==='auth/too-many-requests')return 'Too many attempts. Please wait and try again.';
+    if(error?.code==='auth/invalid-email')return 'Check the email address and try again.';
     if(error?.code==='permission-denied')return 'Access denied. Contact the owner.';
-    return 'Could not complete the request. Please try again.';
+    const code=String(error?.code||'');
+    return /^([a-z-]+\/)?[a-z-]+$/.test(code)?`Could not complete the request (${code}). Please try again.`:'Could not complete the request. Please try again.';
   }
   onAuthStateChanged(auth,async user=>{
     unsub?.();unsub=null;current=null;
     if(!user){render();if(document.getElementById('account-actions'))location.reload();return;}
     try{
       await reload(user);
+      await ensurePendingProfile(user);
+      if(auth.currentUser?.uid!==user.uid)return;
       unsub=(await import('https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js')).onSnapshot(doc(db,'users',user.uid),
         snap=>{current=snap.exists()?snap.data():null;render();},error=>{current=null;render(friendlyError(error))});
     }catch(error){render(friendlyError(error))}
