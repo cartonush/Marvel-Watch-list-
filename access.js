@@ -33,6 +33,7 @@ if (firebaseEnabled && firebaseConfig) {
       await setDoc(ref,{username,email:user.email,view:false,manage:false,Fmanage:false,
         status:'pending',createdAt:serverTimestamp(),updatedAt:serverTimestamp()});
     }catch(error){
+      if(error?.code==='permission-denied')throw Error('Your username was registered, but Firestore blocked the profile. Publish the updated username rules in Firebase, then tap Check again. Do not register a second account.');
       // A second signed-in tab may have created the pending profile first.
       if(!(await getDoc(ref)).exists())throw error;
     }
@@ -83,7 +84,7 @@ if (firebaseEnabled && firebaseConfig) {
     if(error?.code==='auth/too-many-requests')return 'Too many attempts. Please wait and try again.';
     if(error?.code==='auth/invalid-email')return 'Check the username and try again.';
     if(error?.code==='permission-denied')return 'Access denied. Contact the owner.';
-    if(error?.message?.startsWith('Username must')||error?.message?.startsWith('This account uses'))return error.message;
+    if(error?.message?.startsWith('Username must')||error?.message?.startsWith('This account uses')||error?.message?.startsWith('Your username was registered'))return error.message;
     const code=String(error?.code||'');
     return /^([a-z-]+\/)?[a-z-]+$/.test(code)?`Could not complete the request (${code}). Please try again.`:'Could not complete the request. Please try again.';
   }
