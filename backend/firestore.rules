@@ -2,12 +2,16 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     function signedIn() { return request.auth != null; }
+    function usernameAccount() {
+      return signedIn() && request.auth.token.email is string
+        && request.auth.token.email.matches('^[a-z][a-z0-9_]{2,23}@users[.]marvel-list[.]invalid$');
+    }
     function owner() {
-      return signedIn() && request.auth.token.email_verified == true
+      return usernameAccount()
         && request.auth.uid == get(/databases/$(database)/documents/system/owner).data.uid;
     }
     function approved() {
-      return signedIn() && request.auth.token.email_verified == true
+      return usernameAccount()
         && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'approved'
         && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.view == true;
     }
@@ -21,9 +25,11 @@ service cloud.firestore {
         || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.Fmanage == true);
     }
     function userShape(d) {
-      return d.keys().hasAll(['email','view','manage','Fmanage','status','createdAt','updatedAt'])
-        && d.keys().hasOnly(['email','view','manage','Fmanage','status','createdAt','updatedAt'])
+      return d.keys().hasAll(['username','email','view','manage','Fmanage','status','createdAt','updatedAt'])
+        && d.keys().hasOnly(['username','email','view','manage','Fmanage','status','createdAt','updatedAt'])
+        && d.username is string && d.username.matches('^[a-z][a-z0-9_]{2,23}$')
         && d.email is string && d.email.size() <= 254
+        && d.email == d.username + '@users.marvel-list.invalid'
         && d.view is bool && d.manage is bool && d.Fmanage is bool
         && d.status in ['pending','approved','disabled']
         && d.createdAt is timestamp && d.updatedAt == request.time
@@ -37,13 +43,14 @@ service cloud.firestore {
     match /users/{uid} {
       allow get: if (signedIn() && request.auth.uid == uid) || fullManage();
       allow list: if fullManage();
-      allow create: if signedIn() && request.auth.uid == uid
+      allow create: if usernameAccount() && request.auth.uid == uid
         && userShape(request.resource.data)
         && request.resource.data.email == request.auth.token.email
         && request.resource.data.status == 'pending'
         && request.resource.data.createdAt == request.time;
       allow update: if userShape(request.resource.data)
         && uid != get(/databases/$(database)/documents/system/owner).data.uid
+        && request.resource.data.username == resource.data.username
         && request.resource.data.email == resource.data.email
         && request.resource.data.createdAt == resource.data.createdAt
         && (owner() || (fullManage() && uid != request.auth.uid

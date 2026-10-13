@@ -5,24 +5,25 @@ import {initializeTestEnvironment, assertFails, assertSucceeds} from '@firebase/
 import {doc, setDoc, getDoc, updateDoc, deleteDoc, serverTimestamp, writeBatch} from 'firebase/firestore';
 let env;
 const title=(name,by='owner')=>({title:name,date:'2026',seconds:null,kind:'movie',episodes:1,createdAt:new Date(),createdBy:by,archived:false,group:'extra',collections:['marvel'],url:'https://en.wikipedia.org/',poster:'',priority:'later',reason:'Test'});
-const profile=(email,flags={})=>({email,status:'approved',view:true,manage:false,Fmanage:false,createdAt:new Date(),updatedAt:new Date(),...flags});
-const db=(uid,verified=true)=>env.authenticatedContext(uid,{email:uid+'@example.test',email_verified:verified}).firestore();
+const profile=(username,flags={})=>({username,email:username+'@users.marvel-list.invalid',status:'approved',view:true,manage:false,Fmanage:false,createdAt:new Date(),updatedAt:new Date(),...flags});
+const db=uid=>env.authenticatedContext(uid,{email:uid+'@users.marvel-list.invalid',email_verified:false}).firestore();
 before(async()=>{
  env=await initializeTestEnvironment({projectId:'demo-marvel-access',firestore:{rules:readFileSync(new URL('./firestore.rules',import.meta.url),'utf8')}});
  await env.withSecurityRulesDisabled(async c=>{
   const d=c.firestore();await setDoc(doc(d,'system/owner'),{uid:'owner'});
-  for(const [uid,flags]of Object.entries({owner:{manage:true,Fmanage:true},admin:{Fmanage:true},manager:{manage:true},viewer:{},pending:{status:'pending',view:false},disabled:{status:'disabled',view:false}}))await setDoc(doc(d,'users/'+uid),profile(uid+'@example.test',flags));
+  for(const [uid,flags]of Object.entries({owner:{manage:true,Fmanage:true},admin:{Fmanage:true},manager:{manage:true},viewer:{},pending:{status:'pending',view:false},disabled:{status:'disabled',view:false}}))await setDoc(doc(d,'users/'+uid),profile(uid,flags));
   await setDoc(doc(d,'titles/original'),title('Test'));
  });
 });
 after(async()=>{await env?.cleanup()});
-test('anonymous, unverified, pending and disabled accounts cannot read catalog',async()=>{
- for(const d of [env.unauthenticatedContext().firestore(),db('viewer',false),db('pending'),db('disabled')])await assertFails(getDoc(doc(d,'titles/original')));
+test('anonymous, pending, disabled and legacy email accounts cannot read catalog',async()=>{
+ for(const d of [env.unauthenticatedContext().firestore(),env.authenticatedContext('viewer',{email:'viewer@example.test'}).firestore(),db('pending'),db('disabled')])await assertFails(getDoc(doc(d,'titles/original')));
  await assertSucceeds(getDoc(doc(db('viewer'),'titles/original')));
 });
 test('new account cannot choose its own privileges',async()=>{
- const d=db('new');const base={...profile('new@example.test',{status:'pending',view:false}),createdAt:serverTimestamp(),updatedAt:serverTimestamp()};
+ const d=db('new');const base={...profile('new',{status:'pending',view:false}),createdAt:serverTimestamp(),updatedAt:serverTimestamp()};
  await assertFails(setDoc(doc(d,'users/new'),{...base,manage:true}));
+ await assertFails(setDoc(doc(d,'users/new'),{...base,username:'other'}));
  await assertSucceeds(setDoc(doc(d,'users/new'),base));
 });
 test('viewer cannot approve themselves or grant manage',async()=>{

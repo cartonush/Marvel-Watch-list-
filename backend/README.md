@@ -1,8 +1,10 @@
-# Account access: registration enabled, owner bootstrap pending
+# Username sign-in and access control
 
-The current public GitHub Pages website remains a browser-local tracker. These rules and the owner bootstrap are a backend foundation, not an active login system. No users, passwords, private keys, service account files, or allowlists belong in the repository.
+The public GitHub Pages site uses Firebase Authentication's email/password provider internally. Visitors enter a username and password only. The client maps a lowercase username to a reserved, undeliverable address such as `alex@users.marvel-list.invalid`; it never requests a real email. Firebase stores passwords. User documents contain username, the internal alias, access flags and timestamps, never passwords. Firebase's email/password provider must remain enabled.
 
-## Permission contract
+Usernames are 3–24 characters, start with a letter and contain only ASCII letters, digits and underscores. They are case insensitive. Firebase Auth enforces unique internal aliases. Without a real email, self-service email verification and password recovery are unavailable; an operator with Firebase Admin access must handle account recovery. Never publish Admin credentials or service-account JSON in the repo.
+
+## Permissions
 
 | Role | Read protected catalog | Add titles | Edit existing titles | Basic shared settings | Approve/disable regular users | Grant roles | Approve title archival |
 |---|---|---|---|---|---|---|---|
@@ -12,20 +14,14 @@ The current public GitHub Pages website remains a browser-local tracker. These r
 | Fmanage | Yes | Yes | Yes | Yes | Yes | No | Request only |
 | Owner | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
 
-Approved accounts also require verified email and `view: true`. Registration creates an own `users/{uid}` record with `status: pending` and all flags false. A regular manager cannot edit existing titles; this uses the narrowest interpretation of the owner's instructions pending clarification. Fmanage cannot modify themselves, another manager or the owner. Only the owner may grant roles. The owner UID lives in a protected server record and can only be bootstrapped once with privileged credentials.
+Registrants create their own pending profile with flags false. The username never grants roles. Only the protected `system/owner` document ties a specific Firebase Auth UID to owner access. Full managers may approve viewers, but cannot grant roles or approve themselves. Only the owner may grant roles or approve archival. Browser clients cannot replace the owner, hard delete a title or delete a user profile.
 
-Passwords are managed by Firebase Authentication. User documents contain email, view, manage, Fmanage, status and timestamps, never passwords or password hashes. Archival replaces hard deletion so a mistaken removal is recoverable. Fmanage submits a deletion request; owner approval and title archival should be one Firestore transaction. Hard deletion and user document deletion are denied to all browser clients.
+## Deploy and initialize
 
-## Required before activation
+1. In Firebase Console → Firestore Database → Rules, paste `backend/firestore.rules` and click **Publish**. The site needs these rules before new username registrations work. Enable Email/Password in Authentication → Sign-in method, and authorize the live domain in Authentication → Settings.
+2. Register your own username on the site. Copy the **Account ID** (Firebase Auth UID) shown on the pending screen. No one else should approve this profile; owner bootstrap is a privileged one-time setup.
+3. In a private operator environment with Application Default Credentials, run `MARVEL_FIREBASE_PROJECT=marvel-list-database MARVEL_OWNER_UID=<copied UID> node backend/bootstrap-owner.mjs`. It refuses to replace an existing owner. Alternatively use the Firebase Console/Admin SDK to create `system/owner` with `{uid: <copied UID>}` and set that exact `users/<UID>` profile to `username: <your normalized username>, email: <username>@users.marvel-list.invalid, status: approved, view: true, manage: true, Fmanage: true`, preserving valid timestamps. The script is safer because it checks the UID and alias. Do not give owner access solely because a username matches a chosen name.
+4. The owner account opens without approval by another user. To add friends, they register usernames, then the owner approves them in Manage site.
+5. Run authorization tests locally from `backend/`: `npm install` and `npx firebase emulators:exec --only firestore --project demo-marvel-access 'npm run test:rules'`.
 
-1. The owner supplied project `marvel-list-database` and confirmed `roisuissa6@gmail.com`. Enable email/password Auth and Firestore with production rules. Add the actual GitHub Pages/custom domain to Auth's authorized domains.
-2. Enable a strong password policy and email-enumeration protection. Set email verification and password recovery templates. Configure quotas/abuse monitoring; consider App Check before exposing registration publicly.
-3. Install Firebase Admin SDK only in the local operator environment. Use Application Default Credentials. Run `MARVEL_FIREBASE_PROJECT=... MARVEL_OWNER_EMAIL=... node bootstrap-owner.mjs` after the owner has registered and verified email. Do not paste service-account credentials into chat or commit them.
-4. In `backend/`, install dependencies with `npm install`; the authorization suite passed 8/8 checks using `npx firebase emulators:exec --only firestore 'npm run test:rules' --project demo-marvel-access` on 13 October 2026. Deploy `firestore.rules` to the real project before enabling the client. Rules are not yet deployed.
-5. The public Web App configuration is in `dist/firebase-config.js`; `firebaseEnabled` is true after the project owner published the rules. Registration and the pending-approval UI are enabled. Personal watch progress stays local. Register and verify `roisuissa6@gmail.com`, then bootstrap the owner before inviting friends.
-6. With private Application Default Credentials on the operator's computer, run `MARVEL_FIREBASE_PROJECT=... node seed-catalog.mjs` from `backend/` to import all existing titles without replacing edits. The existing `dist/data.json` and old Git commits are public. A login overlay cannot make their contents private; protect any new truly private data in Firestore only.
-7. Test actual accounts in the real project: registration, email verification, viewer approval and revocation, Manage/Fmanage/Owner actions, password recovery, and the GitHub Pages/custom domain before inviting friends.
-
-The owner reported the rules published on 13 October 2026; a live rule read has not been independently authenticated in this workspace. The login UI is enabled, but no account has been bootstrapped here. Never commit credentials, password hashes, service-account JSON, or private keys. The static GitHub Pages catalog remains publicly retrievable regardless of this UI gate.
-
-References: https://firebase.google.com/docs/firestore/security/rules-conditions · https://firebase.google.com/docs/auth/web/manage-users · https://firebase.google.com/docs/firestore/security/test-rules-emulator
+The old real-email login account does not automatically migrate to username authentication. If one exists, sign out and register a username, then bootstrap that new UID. A public static `data.json` and Git history remain publicly retrievable even behind the login overlay. Store truly private future data in protected Firestore collections.
