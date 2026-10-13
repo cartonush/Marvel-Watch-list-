@@ -1,0 +1,16 @@
+{
+  "name": "marvel-access-operator",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:rules": "node --test rules.test.mjs"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.5.0"
+  },
+  "devDependencies": {
+    "firebase": "^12.0.0",
+    "@firebase/rules-unit-testing": "^5.0.0",
+    "firebase-tools": "^14.0.0"
+  }
+}

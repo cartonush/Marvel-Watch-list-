@@ -54,13 +54,22 @@ service cloud.firestore {
       allow delete: if false;
     }
     function titleShape(d) {
-      return d.keys().hasAll(['title','date','seconds','kind','episodes','createdBy','createdAt','archived'])
-        && d.keys().hasOnly(['title','date','seconds','kind','episodes','createdBy','createdAt','archived'])
+      return d.keys().hasAll(['title','date','seconds','kind','episodes','createdBy','createdAt','archived','group','collections','url','poster','priority','reason'])
+        && d.keys().hasOnly(['title','date','seconds','kind','episodes','createdBy','createdAt','archived','group','collections','url','poster','priority','reason'])
         && d.title is string && d.title.size() > 0 && d.title.size() <= 250
         && d.date is string && d.date.size() <= 20
         && (d.seconds == null || (d.seconds is int && d.seconds > 0 && d.seconds <= 100000000))
         && d.kind in ['movie','series'] && d.episodes is int && d.episodes > 0 && d.episodes <= 1000
-        && d.createdBy is string && d.createdAt is timestamp && d.archived is bool;
+        && d.createdBy is string && d.createdAt is timestamp && d.archived is bool
+        && d.group in ['1','2','3','4','5','6','7','extra']
+        && d.collections is list && d.collections.size() >= 1 && d.collections.size() <= 2
+        && d.collections[0] == 'marvel'
+        && (d.collections.size() == 1 || d.collections[1] == 'mcu')
+        && d.url is string && d.url.size() <= 1000 && d.url.matches('https://.*')
+        && d.poster is string && d.poster.size() <= 150
+        && (d.poster == '' || d.poster.matches('assets/[A-Za-z0-9_-]+[.]webp'))
+        && d.priority in ['core','background','optional','later']
+        && d.reason is string && d.reason.size() <= 1000;
     }
     match /titles/{id} {
       allow read: if approved();

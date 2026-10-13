@@ -4,6 +4,7 @@ import {test, before, after} from 'node:test';
 import {initializeTestEnvironment, assertFails, assertSucceeds} from '@firebase/rules-unit-testing';
 import {doc, setDoc, getDoc, updateDoc, deleteDoc, serverTimestamp, writeBatch} from 'firebase/firestore';
 let env;
+const title=(name,by='owner')=>({title:name,date:'2026',seconds:null,kind:'movie',episodes:1,createdAt:new Date(),createdBy:by,archived:false,group:'extra',collections:['marvel'],url:'https://en.wikipedia.org/',poster:'',priority:'later',reason:'Test'});
 const profile=(email,flags={})=>({email,status:'approved',view:true,manage:false,Fmanage:false,createdAt:new Date(),updatedAt:new Date(),...flags});
 const db=(uid,verified=true)=>env.authenticatedContext(uid,{email:uid+'@example.test',email_verified:verified}).firestore();
 before(async()=>{
@@ -11,7 +12,7 @@ before(async()=>{
  await env.withSecurityRulesDisabled(async c=>{
   const d=c.firestore();await setDoc(doc(d,'system/owner'),{uid:'owner'});
   for(const [uid,flags]of Object.entries({owner:{manage:true,Fmanage:true},admin:{Fmanage:true},manager:{manage:true},viewer:{},pending:{status:'pending',view:false},disabled:{status:'disabled',view:false}}))await setDoc(doc(d,'users/'+uid),profile(uid+'@example.test',flags));
-  await setDoc(doc(d,'titles/original'),{title:'Test',date:'2026',seconds:null,kind:'movie',episodes:1,createdAt:new Date(),createdBy:'owner',archived:false});
+  await setDoc(doc(d,'titles/original'),title('Test'));
  });
 });
 after(async()=>{await env?.cleanup()});
@@ -29,7 +30,7 @@ test('viewer cannot approve themselves or grant manage',async()=>{
  await assertFails(updateDoc(doc(db('pending'),'users/pending'),{status:'approved',view:true,updatedAt:serverTimestamp()}));
 });
 test('manager can add a valid title, but cannot edit or delete existing titles',async()=>{
- const d=db('manager');await assertSucceeds(setDoc(doc(d,'titles/manager-added'),{title:'Added',date:'2026',seconds:null,kind:'movie',episodes:1,createdAt:serverTimestamp(),createdBy:'manager',archived:false}));
+ const d=db('manager');await assertSucceeds(setDoc(doc(d,'titles/manager-added'),{...title('Added','manager'),createdAt:serverTimestamp()}));
  await assertFails(updateDoc(doc(d,'titles/original'),{title:'Changed'}));
  await assertFails(deleteDoc(doc(d,'titles/original')));
  await assertFails(updateDoc(doc(d,'titles/original'),{archived:true}));

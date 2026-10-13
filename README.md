@@ -4,11 +4,11 @@ English, responsive, buildless Marvel watch tracker based on the user's Google S
 
 ## Deployment
 
-Static output is `dist/`. No dependencies, API keys, server database, or runtime integrations. Hosting identity is in `.openai/hosting.json`.
+Static output is `dist/`. The tracker still works without a backend. An optional Firebase Authentication and Firestore integration is staged but disabled in `dist/firebase-config.js`; see `backend/README.md` before activation. Hosting identity is in `.openai/hosting.json`.
 
 ## Data
 
-`dist/data.json` contains 86 titles, 317 units (movies/episodes), and all 84 original watch URLs. Two additions, X-Men: First Class and The Defenders, link to official Disney+ pages. Thirteen unknown/zero durations remain null. Data is a snapshot, not live synchronization. `watched` holds the source's 23 checked titles for opt-in additive import; new visitors start fresh. Poster provenance is recorded per item.
+`dist/data.json` contains 344 titles, including the earlier 110-title watchlist, the Wikipedia-based MCU collection and the expanded All Marvel collection. The existing title positions are preserved for saved progress. Data is a snapshot, not live synchronization. `watched` holds the source's checked titles for opt-in additive import; new visitors start fresh. Poster provenance is recorded per item.
 
 The source's unusual dates are preserved and explained in the data dialog. Runtime estimates for partly completed seasons divide total season duration evenly by episode count.
 
