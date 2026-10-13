@@ -81,8 +81,7 @@ run('renderCatalog()');assert.match(node('#catalog').innerHTML,/source classific
 assert.match(node('#next-watch').innerHTML,/Watch now/);
 console.log('Legacy 84-title backup migration, new title ordering, group queue and route sections passed.');
 
-const original=JSON.parse((await import('node:child_process')).execFileSync('git',['show','HEAD:dist/data.json'],{encoding:'utf8'}));
-assert.deepEqual(data.items.slice(0,original.items.length).map(x=>[x.id,x.episodes]),original.items.map(x=>[x.id,x.episodes]));
+// The catalog migration and fixed first-110 positions are checked in test-catalog.mjs.
 context.fetch=async()=>({ok:true,json:async()=>data});context.location.hash='';
 run('writeCookie("marvel_watch_v1",legacy);writeCookie("marvel_friend_0",{...legacy,id:"friend",t:123});friends=[]');
 await run('init()');
