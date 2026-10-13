@@ -101,7 +101,7 @@ if (firebaseEnabled && firebaseConfig) {
   }
   onAuthStateChanged(auth,async user=>{
     unsub?.();unsub=null;current=null;
-    if(!user){render();if(document.getElementById('account-actions'))location.reload();return;}
+    if(!user){const wasApproved=!!document.getElementById('account-actions');render();if(wasApproved)location.reload();return;}
     try{
       await ensurePendingProfile(user);
       if(auth.currentUser?.uid!==user.uid)return;

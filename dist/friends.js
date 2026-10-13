@@ -59,4 +59,4 @@ document.addEventListener('click',async e=>{
  try{const f=api.firestore,ref=f.doc(api.db,'friendships',id);if(button.dataset.accept){if(row.requestedBy===uid)throw Error('Only the recipient can accept.');await f.updateDoc(ref,{status:'accepted',updatedAt:f.serverTimestamp()});message(`You and @${friendName(row)} are now friends.`)}else{await f.deleteDoc(ref);message('Request or friendship removed.')}await refresh()}catch(err){message(errorText(err));button.disabled=false}
 });
 $('#refresh-friends').onclick=refresh;
-try{api=globalThis.MarvelAccess;await api.ready;uid=api.auth.currentUser.uid;const response=await fetch('data.json',{cache:'no-cache'});if(response.ok)catalog=(await response.json()).items;await refresh()}catch(e){message('Could not load friends. Please reload the page.')}
+try{api=globalThis.MarvelAccess;await api.ready;uid=api.auth.currentUser.uid;const response=await fetch('data.json',{cache:'no-cache'});if(response.ok)catalog=(await api.enrich(await response.json())).items;await refresh()}catch(e){message('Could not load friends. Please reload the page.')}
