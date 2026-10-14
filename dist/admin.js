@@ -4,27 +4,25 @@ let api,account,ownerId,allTitles=[],loading=false,loadedUid=null;
 const note=s=>$('#admin-message').textContent=s;
 const authorized=()=>!!account&&(account.manage===true||account.Fmanage===true||!!api?.isOwner);
 const management=$('#management-view'),main=document.querySelector('main');
+const adminPage=document.body.classList.contains('admin-page');
 function showManagement(){
-  // Always render the route shell for a direct link; privileged data stays hidden without access.
-  const active=location.hash==='#manage';
+  // The dedicated admin page avoids mobile hash routing; retain #manage as a backwards-compatible route.
+  const active=adminPage||location.hash==='#manage';
   main.classList.toggle('management-active',active);
-  management.hidden=!active;$('#manage-nav').classList.toggle('active',active);
+  management.hidden=!active;$('#manage-nav')?.classList.toggle('active',active);
   if(active&&!authorized()){
     $('#admin-content').hidden=true;
     note(api?.account?'This account does not have management access.':'Checking your management access…');
   }
   if(active)window.scrollTo(0,0);
 }
-$('#manage-nav').addEventListener('click',e=>{
+$('#manage-nav')?.addEventListener('click',e=>{
   e.preventDefault();
-  if(location.hash!=='#manage')history.pushState(null,'','#manage');
-  showManagement();
-  if($('#menu').getAttribute('aria-expanded')==='true')$('#menu').click();
-  if(authorized())load().catch(()=>note('Could not load management data. Check Firebase configuration and access.'));
+  location.assign('admin.html');
 });
-$('#leave-management').onclick=()=>{history.pushState(null,'',location.pathname+location.search);showManagement()};
+if(!adminPage)$('#leave-management').onclick=()=>{history.pushState(null,'',location.pathname+location.search);showManagement()};
 window.addEventListener('hashchange',showManagement);window.addEventListener('popstate',showManagement);
-document.querySelector('#sidebar').addEventListener('click',e=>{if(e.target.closest('#manage-nav'))return;if(e.target.closest('[data-group],[data-status],[data-settings],#friends-nav')){history.replaceState(null,'',location.pathname+location.search);showManagement()}},true);
+document.querySelector('#sidebar')?.addEventListener('click',e=>{if(e.target.closest('#manage-nav'))return;if(e.target.closest('[data-group],[data-status],[data-settings],#friends-nav')){history.replaceState(null,'',location.pathname+location.search);showManagement()}},true);
 window.addEventListener('marvel-access-change',()=>{api=window.MarvelAccess||api;const was=!!authorized();account=api?.account||null;if(!authorized()){$('#admin-content').hidden=true;showManagement()}else if(!was||location.hash==='#manage')load().catch(()=>note('Could not load management data.'))});
 async function load(){
   if(loading)return;

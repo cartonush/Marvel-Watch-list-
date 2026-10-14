@@ -142,3 +142,7 @@ main.management-active > :not(#management-view){display:none!important}
 #friend-message{min-height:20px;color:var(--red)}
 .friends-page .topbar .top-actions,.lists-page .topbar .top-actions{gap:12px}
 @media(max-width:700px){.friends-page .topbar,.lists-page .topbar{display:flex;flex-wrap:wrap;gap:8px;padding:10px 12px}.friends-page .topbar .top-actions,.lists-page .topbar .top-actions{margin-left:auto}.friends-page .topbar .secondary,.lists-page .topbar .secondary{font-size:10px;padding:8px}.friends-page .topbar .profile-button>span:not(:first-child),.lists-page .topbar .profile-button>span:not(:first-child){display:none}.friend-entry{align-items:flex-start;flex-wrap:wrap}.friend-entry>div:first-child{min-width:0;flex:1}.friends-main{padding-top:25px}}
+
+/* Version 1.5.5: standalone management route, stable on mobile Safari. */
+.admin-page main{margin:0 auto;max-width:1200px;padding:28px clamp(16px,4vw,36px) 80px;min-height:calc(100dvh - 78px)}.admin-page .management-view{padding-top:12px}.admin-page .management-heading{align-items:flex-start}.admin-page #admin-message{min-height:24px;color:var(--muted)}.admin-page .topbar{justify-content:space-between}.admin-page .topbar .top-actions{margin-inline-start:0}
+@media(max-width:700px){.admin-page main{padding:20px 14px max(50px,env(safe-area-inset-bottom))}.admin-page .management-view{padding:0 0 30px}.admin-page .topbar .top-actions{margin-inline-start:auto}.admin-page .management-heading{gap:12px}.admin-page .management-heading .secondary{width:100%;min-height:44px}}

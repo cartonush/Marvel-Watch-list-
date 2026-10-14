@@ -55,7 +55,7 @@ if (firebaseEnabled && firebaseConfig) {
       button.setAttribute('aria-label','Account menu');button.setAttribute('aria-expanded','false');
       let actions=document.getElementById('account-actions');
       if(!actions){actions=document.createElement('div');actions.id='account-actions';actions.className='account-menu';actions.hidden=true;document.body.append(actions)}
-      actions.innerHTML=`<strong>@${esc(current.username||usernameOf(user))}</strong>${document.getElementById('modal')?'<button type="button" data-open-profile>My watch profile</button>':''}<a href="friends.html">My friends</a>${(current.manage||current.Fmanage||isOwner)?'<a href="index.html#manage">Manage site</a>':''}<button type="button" id="sign-out">Sign out</button>`;
+      actions.innerHTML=`<strong>@${esc(current.username||usernameOf(user))}</strong>${document.getElementById('modal')?'<button type="button" data-open-profile>My watch profile</button>':''}<a href="friends.html">My friends</a>${(current.manage||current.Fmanage||isOwner)?'<a href="admin.html">Manage site</a>':''}<button type="button" id="sign-out">Sign out</button>`;
       button.onclick=()=>{actions.hidden=!actions.hidden;button.setAttribute('aria-expanded',String(!actions.hidden));if(!actions.hidden){const r=button.getBoundingClientRect();actions.style.top=`${r.bottom+8}px`;actions.style.right=`${Math.max(10,innerWidth-r.right)}px`}};
       actions.querySelector('#sign-out').onclick=()=>signOut(auth);
       actions.querySelector('[data-open-profile]')?.addEventListener('click',()=>{actions.hidden=true;button.setAttribute('aria-expanded','false');document.dispatchEvent(new Event('marvel-open-profile'))});
