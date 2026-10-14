@@ -30,20 +30,11 @@ The old real-email login account does not automatically migrate to username auth
 
 Publish `backend/firestore.rules` again after deploying the site. New catalog titles may include an IMDb URL and a validated poster reference (`imdb:tt...` or a direct image URL from `m.media-amazon.com/images/`). Existing titles remain compatible. The client previews the poster before saving. Automatic suggestions use the external MetaHub image CDN and may not match a preferred IMDb poster, so managers can supply a direct IMDb-hosted poster image URL instead.
 
-## Version 1.5.14 site search
+## Version 1.5.15 site search
 
-The Search sites page has three initial engines: Direct watch (f-movies.org, cinehype.sc), Torrents (yts.gg, ext.to), and Subs (yifysubtitles.ch). A manager can add domains to any engine and create custom engines from Manage site → Search engines. Firestore stores only the engine name, allowed domains, author IDs and timestamps. Do not store API keys in Firestore or in GitHub.
+The Search sites page has three initial categories: Direct watch (f-movies.org, cinehype.sc), Torrents (yts.gg, ext.to), and Subs (yifysubtitles.ch). Searches open a new Google tab with a quoted title and a `site:` filter for each configured domain. Search results appear in Google, with a fallback link on the page if the tab is blocked. No search backend, Brave key, paid Firebase plan or Cloud Functions deployment is required.
 
-Results are returned by the `searchSites` callable function in `backend/functions/`. It checks the authenticated account against approved user and owner records, limits each account to ten searches per minute, queries Brave Search with the configured domains, and returns only HTTPS results on those domains. The browser does not fetch or scrape third-party pages, so a site with no indexed result may show no matches.
-
-To activate live results:
-
-1. Switch the Firebase project `marvel-list-database` to the Blaze plan if necessary. Cloud Functions deployment requires it. Set a Cloud Billing budget alert according to your own preference.
-2. Obtain a Brave Search API key in the Brave Search API dashboard. Keep it private. From a trusted local terminal with Firebase CLI access, run `cd backend && npm install && cd functions && npm install && cd ..`, then `npx firebase functions:secrets:set BRAVE_SEARCH_API_KEY --project marvel-list-database`. Do not put the key in this repository, GitHub Actions, chat, or the browser.
-3. Run `npx firebase deploy --only functions:searchSites,firestore:rules --project marvel-list-database` from `backend/`. GitHub Pages deploys only the frontend; it never deploys these Firebase resources. The new Firestore rules also enable manager configuration of engines.
-4. Open Search sites while signed in and search a title. A missing function or key appears as an activation message on the page.
-
-Configuration is limited to ten validated domains per engine. Managers can add domains but cannot silently remove an existing domain or delete an engine. Neither search terms nor result pages are saved in the watchlist.
+Managers can add domains or create custom categories from Manage site → Search engines. These shared changes require publishing `backend/firestore.rules` in Firebase Console → Firestore Database → Rules, which is possible on the Spark plan. Built-in categories work before the new rules are published. Firestore stores only category names, validated domains, author IDs and timestamps. Configuration is limited to ten domains per category; managers can add but not remove domains or categories. Search terms and result pages are not saved in the watchlist.
 
 ## Version 1.5.2 friendships
 

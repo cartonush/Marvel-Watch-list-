@@ -68,7 +68,7 @@ Nine requested titles now reference distinct local poster files. Six newly sourc
 
 ## Version 1.0.0
 
-The current displayed version is 1.5.14. Advance the patch version when a change is published to GitHub. Skip is a personal saved list separate from watched progress. Skipped titles leave Next to watch, stay uncompleted in statistics, and appear in Skipped Items across routes. Marking a skipped title watched clears its skipped flag. Undo, reset and full backup include the skipped list; old cookies/backups without it remain supported.
+The current displayed version is 1.5.15. Advance the patch version when a change is published to GitHub. Skip is a personal saved list separate from watched progress. Skipped titles leave Next to watch, stay uncompleted in statistics, and appear in Skipped Items across routes. Marking a skipped title watched clears its skipped flag. Undo, reset and full backup include the skipped list; old cookies/backups without it remain supported.
 
 
 ## Version 1.2
@@ -150,3 +150,7 @@ Removed 207 Wikipedia-only titles outside the MCU and Road to Doomsday. The orig
 ## Version 1.5.14
 
 Added Search sites with Direct watch, Torrents and Subs tabs. Managers can add validated domains and create custom engines from the in-app management dashboard. Search results are filtered to the configured HTTPS domains. Live results require the callable Firebase function and a server-side Brave Search API secret; see backend/README.md for deployment. The frontend reports clearly when the service is not yet active.
+
+## Version 1.5.15
+
+Search sites opens a Google search in a new tab with the quoted title and `site:` filters for the selected category. A fallback link remains when a browser blocks the tab. Removed the unused Brave Search function and paid-service requirement. Built-in categories work on GitHub Pages and Firebase Spark. Shared manager-added categories require publishing the Firestore search rules on Spark.

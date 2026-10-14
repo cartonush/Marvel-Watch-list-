@@ -11,12 +11,12 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="manifest" href="manifest.webmanifest?v=20261010">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=20261010">
-  <link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css?v=1.5.14-mobile-20261014">
+  <link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css?v=1.5.15-mobile-20261014">
 </head>
 <body>
 <header class="topbar">
  <a class="brand" href="#" aria-label="Marvel Watch — Home"><b>MARVEL</b><span>WATCH<span class="brand-dot">.</span></span></a>
- <span class="top-caption">One universe. Your journey.</span><span class="app-version" aria-label="Site version 1.5.14">Version 1.5.14</span>
+ <span class="top-caption">One universe. Your journey.</span><span class="app-version" aria-label="Site version 1.5.15">Version 1.5.15</span>
  <div class="top-actions"><span id="save-indicator" class="save-indicator"><i></i> Saved on this device</span><button class="icon-button mobile-menu" id="menu" aria-controls="sidebar" aria-label="Open menu" aria-expanded="false">☰</button><button class="profile-button" id="profile-button"><span id="avatar">C</span><span id="profile-label">My profile</span><span>⌄</span></button></div>
 </header>
 <aside class="sidebar" id="sidebar">
@@ -73,7 +73,7 @@
 <label>Include in All MCU <input name="mcu" type="checkbox"></label>
 <p class="subtle">Other Marvel titles also appear in All Marvel and the full collection. Saving opens your new title in the collection.</p><p id="add-title-message" class="admin-form-message" role="status" aria-live="polite"></p><button class="primary">Add title</button><button type="button" id="view-added-title" class="secondary" hidden>View added title ↗</button></form></section>
    <section class="saved-list admin-screen" data-admin-screen="settings" hidden><button type="button" class="text-button" data-admin-back>← Dashboard</button><h2>Basic settings</h2><p class="subtle" data-admin-loading></p><form id="basic-settings" class="admin-form"><label>Announcement<textarea name="announcement" maxlength="1000" rows="4"></textarea></label><label>Default theme<select name="defaultTheme"><option value="dark">Dark</option><option value="light">Light</option><option value="system">System</option></select></label><button class="secondary">Save settings</button></form></section>
-   <section class="saved-list admin-screen" data-admin-screen="search" hidden><button type="button" class="text-button" data-admin-back>← Dashboard</button><h2>Search engines</h2><p>Add domains to an existing engine or create a new one. Searches include only results from these domains.</p><p class="subtle" data-admin-loading></p><p id="search-config-message" role="status" aria-live="polite"></p><div id="search-engine-admin"></div><form id="new-search-engine" class="admin-form"><h3>Create an engine</h3><label>Engine name<input name="name" required maxlength="40" placeholder="For example: Reviews"></label><label>First site domain<input name="site" required maxlength="100" placeholder="example.com" autocapitalize="none" spellcheck="false"></label><button class="secondary">Create engine</button></form></section>
+   <section class="saved-list admin-screen" data-admin-screen="search" hidden><button type="button" class="text-button" data-admin-back>← Dashboard</button><h2>Search engines</h2><p>Add domains to an existing engine or create a new one. Each search opens Google with site filters in a new tab.</p><p class="subtle" data-admin-loading></p><p id="search-config-message" role="status" aria-live="polite"></p><div id="search-engine-admin"></div><form id="new-search-engine" class="admin-form"><h3>Create an engine</h3><label>Engine name<input name="name" required maxlength="40" placeholder="For example: Reviews"></label><label>First site domain<input name="site" required maxlength="100" placeholder="example.com" autocapitalize="none" spellcheck="false"></label><button class="secondary">Create engine</button></form></section>
    <section class="saved-list admin-screen" data-admin-screen="users" data-admin-senior hidden><button type="button" class="text-button" data-admin-back>← Dashboard</button><h2>Manage users</h2><p>New registrations remain pending until approved. Only the owner can grant manager roles.</p><p class="subtle" data-admin-loading></p><div id="admin-users"></div></section>
    <section class="saved-list admin-screen" data-admin-screen="titles" data-admin-senior hidden><button type="button" class="text-button" data-admin-back>← Dashboard</button><h2>Manage titles</h2><p>Senior managers may edit catalog details and request a removal. The owner approves archival.</p><label>Find title<input id="title-search" maxlength="80" placeholder="Search titles"></label><p class="subtle" data-admin-loading></p><div id="admin-titles"></div></section>
    <section class="saved-list admin-screen" data-admin-screen="requests" data-admin-senior hidden><button type="button" class="text-button" data-admin-back>← Dashboard</button><h2>Removal requests</h2><p class="subtle" data-admin-loading></p><div id="admin-requests"></div></section>
@@ -83,6 +83,6 @@
 <dialog id="modal"><button id="close-modal" class="close-modal" aria-label="Close">×</button><div id="modal-content"></div></dialog>
 <div id="undo-bar" class="undo-bar" hidden><span id="undo-label" role="status"></span><button class="secondary" data-undo>Undo ↶</button></div>
 <div id="toast" role="status" aria-live="polite"></div>
-<script src="cookie-store.js?v=catalog-20261013"></script><script src="lists-store.js?v=1.5.14-catalog-20261014"></script>
-<script src="app.js?v=1.5.14-mobile-20261014" type="module"></script><script src="admin.js?v=1.5.14" type="module"></script>
+<script src="cookie-store.js?v=catalog-20261013"></script><script src="lists-store.js?v=1.5.15-catalog-20261014"></script>
+<script src="app.js?v=1.5.15-mobile-20261014" type="module"></script><script src="admin.js?v=1.5.15" type="module"></script>
 </body></html>

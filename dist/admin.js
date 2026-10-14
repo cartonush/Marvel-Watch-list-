@@ -1,4 +1,4 @@
-import './access.js?v=1.5.14';
+import './access.js?v=1.5.15';
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function imdbId(value){try{const u=new URL(value.trim());if(u.protocol!=='https:'||!['imdb.com','www.imdb.com','m.imdb.com'].includes(u.hostname))return null;return /^\/title\/(tt\d{7,10})\/?$/.exec(u.pathname)?.[1]||null}catch{return null}}
 function directPoster(value){try{const u=new URL(value.trim());return u.protocol==='https:'&&u.hostname==='m.media-amazon.com'&&u.pathname.startsWith('/images/')&&!u.username&&!u.password?u.href:null}catch{return null}}

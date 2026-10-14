@@ -1,4 +1,4 @@
-import './access.js?v=1.5.14';
+import './access.js?v=1.5.15';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const GROUPS=[['1','Phase 1','Where it all began','var(--red)'],['2','Phase 2','The universe expands','var(--red)'],['3','Phase 3','The Infinity Saga','var(--red)'],['4','Phase 4','The world after','var(--red)'],['5','Phase 5','Into the multiverse','var(--red)'],['6','Phase 6','The next great assembly','var(--red)'],['7','Phase 7','Beyond the horizon','var(--red)'],['extra','Road to Doomsday','X-Men, Deadpool & optional street-level stories','var(--red)']];
