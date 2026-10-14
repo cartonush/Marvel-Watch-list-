@@ -7,8 +7,8 @@ const cookies=new Map(),nodes=new Map();let failKey=null;
 function node(s){if(!nodes.has(s))nodes.set(s,{innerHTML:'',textContent:'',value:'',style:{},classList:{add(){},remove(){},toggle(){}},setAttribute(){},addEventListener(){},showModal(){},close(){},scrollIntoView(){}});return nodes.get(s)}
 const document={documentElement:{dataset:{},classList:{toggle(){},add(){},remove(){}}},querySelector:node,querySelectorAll:()=>[],addEventListener(){}};
 Object.defineProperty(document,'cookie',{get:()=>[...cookies].map(([k,v])=>k+'='+v).join('; '),set(s){const i=s.indexOf('='),k=s.slice(0,i),v=s.slice(i+1).split(';')[0];if(k===failKey)return;if(s.includes('Max-Age=0'))cookies.delete(k);else if(v.length<=3800)cookies.set(k,v);}});
-const ctx=vm.createContext({document,location:{protocol:'https:',origin:'https://example.com',href:'https://example.com/index.html',pathname:'/'},crypto:webcrypto,TextEncoder,TextDecoder,btoa,atob,console,setTimeout:()=>0,clearTimeout(){},navigator:{},URL,URLSearchParams,Blob,history:{replaceState(){}},fixture:catalog});
-for(const file of ['cookie-store.js','lists-store.js','app.js'])vm.runInContext(fs.readFileSync('dist/'+file,'utf8').replace(/^import '\.\/access\.js(?:\?[^']*)?';\s*/,'').replace(/init\(\);\s*$/,''),ctx);
+const ctx=vm.createContext({document,location:{protocol:'https:',origin:'https://example.com',href:'https://example.com/index.html',pathname:'/'},crypto:webcrypto,TextEncoder,TextDecoder,btoa,atob,console,setTimeout:()=>0,clearTimeout(){},addEventListener(){},navigator:{},URL,URLSearchParams,Blob,history:{replaceState(){}},fixture:catalog});
+for(const file of ['cookie-store.js','lists-store.js','app.js'])vm.runInContext(fs.readFileSync('dist/'+file,'utf8').replace(/^import '[^']+';\s*/gm,'').replace(/init\(\);\s*$/,''),ctx);
 const run=s=>vm.runInContext(s,ctx);
 run('data=fixture;items=data.items;state=fresh();validateCatalog(data)');
 run('globalThis.MarvelRetiredIds=new Set(data.retiredIds)');
