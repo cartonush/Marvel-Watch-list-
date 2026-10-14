@@ -55,10 +55,11 @@ if (firebaseEnabled && firebaseConfig) {
       button.setAttribute('aria-label','Account menu');button.setAttribute('aria-expanded','false');
       let actions=document.getElementById('account-actions');
       if(!actions){actions=document.createElement('div');actions.id='account-actions';actions.className='account-menu';actions.hidden=true;document.body.append(actions)}
-      actions.innerHTML=`<strong>@${esc(current.username||usernameOf(user))}</strong>${document.getElementById('modal')?'<button type="button" data-open-profile>My watch profile</button>':''}<a href="friends.html">My friends</a>${(current.manage||current.Fmanage||isOwner)?'<a href="admin.html">Manage site</a>':''}<button type="button" id="sign-out">Sign out</button>`;
+      actions.innerHTML=`<strong>@${esc(current.username||usernameOf(user))}</strong>${document.getElementById('modal')?'<button type="button" data-open-profile>My watch profile</button>':''}<a href="friends.html">My friends</a>${(current.manage||current.Fmanage||isOwner)?'<button type="button" data-open-management>Manage site</button>':''}<button type="button" id="sign-out">Sign out</button>`;
       button.onclick=()=>{actions.hidden=!actions.hidden;button.setAttribute('aria-expanded',String(!actions.hidden));if(!actions.hidden){const r=button.getBoundingClientRect();actions.style.top=`${r.bottom+8}px`;actions.style.right=`${Math.max(10,innerWidth-r.right)}px`}};
       actions.querySelector('#sign-out').onclick=()=>signOut(auth);
       actions.querySelector('[data-open-profile]')?.addEventListener('click',()=>{actions.hidden=true;button.setAttribute('aria-expanded','false');document.dispatchEvent(new Event('marvel-open-profile'))});
+      actions.querySelector('[data-open-management]')?.addEventListener('click',()=>{actions.hidden=true;button.setAttribute('aria-expanded','false');document.dispatchEvent(new Event('marvel-open-management'))});
       const handleRef=doc(db,'handles',current.username||usernameOf(user));
       getDoc(handleRef).then(s=>s.exists()?null:setDoc(handleRef,{uid:user.uid,username:current.username||usernameOf(user),createdAt:serverTimestamp()})).catch(()=>{});
       window.dispatchEvent(new Event('marvel-access-change'));
@@ -127,7 +128,7 @@ if (firebaseEnabled && firebaseConfig) {
     for(const row of rows){
       const known=byId.get(row.id),patch={title:row.title,date:row.date,seconds:row.seconds,
         kind:row.kind,episodes:row.episodes,group:row.group,collections:row.collections,
-        url:row.url,poster:row.poster,priority:row.priority,reason:row.reason,archived:row.archived};
+        url:row.url,poster:row.poster,imdb:row.imdb||'',priority:row.priority,reason:row.reason,archived:row.archived};
       if(known!==undefined){base.items[known]={...base.items[known],...patch};continue}
       const mcu=row.collections.includes('mcu');
       base.items.push({...patch,id:row.id,watched:false,sourceCell:null,order:10000+base.items.length,

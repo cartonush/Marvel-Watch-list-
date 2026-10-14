@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en" dir="ltr">
 <head>
-  <meta charset="utf-8"><meta name="referrer" content="no-referrer"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com; object-src 'none'; base-uri 'none'; form-action 'self'; upgrade-insecure-requests"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="utf-8"><meta name="referrer" content="no-referrer"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://images.metahub.space https://m.media-amazon.com; connect-src 'self' https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com; object-src 'none'; base-uri 'none'; form-action 'self'; upgrade-insecure-requests"><meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#0c0c10"><meta name="description" content="Your personal journey through the Marvel universe. Posters, watch tracking, phases, and comparisons with friends.">
   <title>Marvel List</title>
   <meta name="application-name" content="Marvel List">
@@ -11,12 +11,12 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="manifest" href="manifest.webmanifest?v=20261010">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=20261010">
-  <link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css?v=1.5.11-mobile-20261014">
+  <link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css?v=1.5.12-mobile-20261014">
 </head>
 <body>
 <header class="topbar">
  <a class="brand" href="#" aria-label="Marvel Watch — Home"><b>MARVEL</b><span>WATCH<span class="brand-dot">.</span></span></a>
- <span class="top-caption">One universe. Your journey.</span><span class="app-version" aria-label="Site version 1.5.11">Version 1.5.11</span>
+ <span class="top-caption">One universe. Your journey.</span><span class="app-version" aria-label="Site version 1.5.12">Version 1.5.12</span>
  <div class="top-actions"><span id="save-indicator" class="save-indicator"><i></i> Saved on this device</span><button class="icon-button mobile-menu" id="menu" aria-controls="sidebar" aria-label="Open menu" aria-expanded="false">☰</button><button class="profile-button" id="profile-button"><span id="avatar">C</span><span id="profile-label">My profile</span><span>⌄</span></button></div>
 </header>
 <aside class="sidebar" id="sidebar">
@@ -65,7 +65,12 @@
      <button type="button" class="admin-dashboard-card" data-admin-panel="requests" data-admin-senior hidden><span class="dashboard-icon">⌫</span><strong>Removal requests</strong><small>Review pending requests for archival.</small><span class="dashboard-arrow">Open ↗</span></button>
     </div>
    </div>
-   <section class="saved-list admin-screen" data-admin-screen="add" hidden><button type="button" class="text-button" data-admin-back>← Dashboard</button><h2>Add title</h2><form id="add-title" class="admin-form"><label>Title<input name="title" required maxlength="250"></label><label>Release date<input name="date" placeholder="DD/MM/YYYY or YYYY" maxlength="20" required></label><label>Runtime in minutes<input name="minutes" type="number" min="1" max="1000000" placeholder="Unknown if blank"></label><label>Episodes<input name="episodes" type="number" min="1" max="1000" value="1" required></label><label>Kind<select name="kind"><option value="movie">Movie or special</option><option value="series">Series or season</option></select></label><label>Phase<select name="group"><option value="extra">Other Marvel</option><option value="1">Phase 1</option><option value="2">Phase 2</option><option value="3">Phase 3</option><option value="4">Phase 4</option><option value="5">Phase 5</option><option value="6">Phase 6</option><option value="7">Phase 7</option></select></label><label>Link<input name="url" type="url" placeholder="https://…"></label><label>MCU collection<input name="mcu" type="checkbox"></label><button class="primary">Add title</button></form></section>
+   <section class="saved-list admin-screen" data-admin-screen="add" hidden><button type="button" class="text-button" data-admin-back>← Dashboard</button><h2>Add title</h2><form id="add-title" class="admin-form"><label>Title<input name="title" required maxlength="250"></label><label>Release date<input name="date" placeholder="DD/MM/YYYY or YYYY" maxlength="20" required></label><label>Runtime in minutes<input name="minutes" type="number" min="1" max="1000000" placeholder="Unknown if blank"></label><label>Episodes<input name="episodes" type="number" min="1" max="1000" value="1" required></label><label>Kind<select name="kind"><option value="movie">Movie or special</option><option value="series">Series or season</option></select></label><label>Phase<select name="group"><option value="extra">Other Marvel</option><option value="1">Phase 1</option><option value="2">Phase 2</option><option value="3">Phase 3</option><option value="4">Phase 4</option><option value="5">Phase 5</option><option value="6">Phase 6</option><option value="7">Phase 7</option></select></label><label>IMDb title link <span class="required-mark">Required for poster</span><input name="imdb" type="url" inputmode="url" maxlength="120" placeholder="https://www.imdb.com/title/tt0371746/" required></label>
+<div class="admin-poster-preview"><img id="add-poster-preview" alt="Poster preview" hidden><div><strong>Poster preview</strong><p id="add-poster-status" class="subtle" role="status">Paste the IMDb title link to load a poster suggestion.</p></div></div>
+<label>Custom poster image URL <span class="subtle">Optional if the suggested poster is wrong or unavailable</span><input name="posterUrl" type="url" inputmode="url" maxlength="500" placeholder="https://m.media-amazon.com/images/…"></label>
+<label>Watch link <span class="subtle">Optional; defaults to the IMDb page</span><input name="url" type="url" inputmode="url" placeholder="https://…"></label>
+<label>Include in All MCU <input name="mcu" type="checkbox"></label>
+<p class="subtle">Other Marvel titles also appear in All Marvel and the full collection. Newly added titles become visible as soon as they are saved.</p><button class="primary">Add title</button></form></section>
    <section class="saved-list admin-screen" data-admin-screen="settings" hidden><button type="button" class="text-button" data-admin-back>← Dashboard</button><h2>Basic settings</h2><p class="subtle" data-admin-loading></p><form id="basic-settings" class="admin-form"><label>Announcement<textarea name="announcement" maxlength="1000" rows="4"></textarea></label><label>Default theme<select name="defaultTheme"><option value="dark">Dark</option><option value="light">Light</option><option value="system">System</option></select></label><button class="secondary">Save settings</button></form></section>
    <section class="saved-list admin-screen" data-admin-screen="users" data-admin-senior hidden><button type="button" class="text-button" data-admin-back>← Dashboard</button><h2>Manage users</h2><p>New registrations remain pending until approved. Only the owner can grant manager roles.</p><p class="subtle" data-admin-loading></p><div id="admin-users"></div></section>
    <section class="saved-list admin-screen" data-admin-screen="titles" data-admin-senior hidden><button type="button" class="text-button" data-admin-back>← Dashboard</button><h2>Manage titles</h2><p>Senior managers may edit catalog details and request a removal. The owner approves archival.</p><label>Find title<input id="title-search" maxlength="80" placeholder="Search titles"></label><p class="subtle" data-admin-loading></p><div id="admin-titles"></div></section>
@@ -76,6 +81,6 @@
 <dialog id="modal"><button id="close-modal" class="close-modal" aria-label="Close">×</button><div id="modal-content"></div></dialog>
 <div id="undo-bar" class="undo-bar" hidden><span id="undo-label" role="status"></span><button class="secondary" data-undo>Undo ↶</button></div>
 <div id="toast" role="status" aria-live="polite"></div>
-<script src="cookie-store.js?v=catalog-20261013"></script><script src="lists-store.js?v=1.5.11-catalog-20261014"></script>
-<script src="app.js?v=1.5.11-mobile-20261014" type="module"></script><script src="admin.js?v=1.5.11" type="module"></script>
+<script src="cookie-store.js?v=catalog-20261013"></script><script src="lists-store.js?v=1.5.12-catalog-20261014"></script>
+<script src="app.js?v=1.5.12-mobile-20261014" type="module"></script><script src="admin.js?v=1.5.12" type="module"></script>
 </body></html>

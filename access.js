@@ -128,7 +128,7 @@ if (firebaseEnabled && firebaseConfig) {
     for(const row of rows){
       const known=byId.get(row.id),patch={title:row.title,date:row.date,seconds:row.seconds,
         kind:row.kind,episodes:row.episodes,group:row.group,collections:row.collections,
-        url:row.url,poster:row.poster,priority:row.priority,reason:row.reason,archived:row.archived};
+        url:row.url,poster:row.poster,imdb:row.imdb||'',priority:row.priority,reason:row.reason,archived:row.archived};
       if(known!==undefined){base.items[known]={...base.items[known],...patch};continue}
       const mcu=row.collections.includes('mcu');
       base.items.push({...patch,id:row.id,watched:false,sourceCell:null,order:10000+base.items.length,

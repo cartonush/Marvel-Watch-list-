@@ -26,6 +26,10 @@ Registrants create their own pending profile with flags false. The username neve
 
 The old real-email login account does not automatically migrate to username authentication. If one exists, sign out and register a username, then bootstrap that new UID. A public static `data.json` and Git history remain publicly retrievable even behind the login overlay. Store truly private future data in protected Firestore collections.
 
+## Version 1.5.12 posters
+
+Publish `backend/firestore.rules` again after deploying the site. New catalog titles may include an IMDb URL and a validated poster reference (`imdb:tt...` or a direct image URL from `m.media-amazon.com/images/`). Existing titles remain compatible. The client previews the poster before saving. Automatic suggestions use the external MetaHub image CDN and may not match a preferred IMDb poster, so managers can supply a direct IMDb-hosted poster image URL instead.
+
 ## Version 1.5.2 friendships
 
 Publish the updated `backend/firestore.rules` from this version before sending requests. Approved users get a username handle under `handles/{username}` when they open the updated site. A sender searches that exact handle, then creates a pending `friendships/{pair}` record. Only the other participant can accept it. Either participant can remove a request or friendship. There is no friend count limit.

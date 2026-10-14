@@ -4,7 +4,7 @@ import {test, before, after} from 'node:test';
 import {initializeTestEnvironment, assertFails, assertSucceeds} from '@firebase/rules-unit-testing';
 import {doc, setDoc, getDoc, getDocs, collection, query, where, updateDoc, deleteDoc, serverTimestamp, writeBatch} from 'firebase/firestore';
 let env;
-const title=(name,by='owner')=>({title:name,date:'2026',seconds:null,kind:'movie',episodes:1,createdAt:new Date(),createdBy:by,archived:false,group:'extra',collections:['marvel'],url:'https://en.wikipedia.org/',poster:'',priority:'later',reason:'Test'});
+const title=(name,by='owner')=>({title:name,date:'2026',seconds:null,kind:'movie',episodes:1,createdAt:new Date(),createdBy:by,archived:false,group:'extra',collections:['marvel'],url:'https://en.wikipedia.org/',imdb:'https://www.imdb.com/title/tt0371746/',poster:'imdb:tt0371746',priority:'later',reason:'Test'});
 const profile=(username,flags={})=>({username,email:username+'@users.marvel-list.invalid',status:'approved',view:true,manage:false,Fmanage:false,createdAt:new Date(),updatedAt:new Date(),...flags});
 const db=uid=>env.authenticatedContext(uid,{email:uid+'@users.marvel-list.invalid',email_verified:false}).firestore();
 before(async()=>{
@@ -35,6 +35,11 @@ test('manager can add a valid title, but cannot edit or delete existing titles',
  await assertFails(updateDoc(doc(d,'titles/original'),{title:'Changed'}));
  await assertFails(deleteDoc(doc(d,'titles/original')));
  await assertFails(updateDoc(doc(d,'titles/original'),{archived:true}));
+});
+test('manager can add a title with an IMDb poster, but untrusted poster hosts are denied',async()=>{
+ const d=db('manager'),imdb='https://www.imdb.com/title/tt0371746/';
+ await assertSucceeds(setDoc(doc(d,'titles/imdb-added'),{...title('Iron Man','manager'),imdb,poster:'imdb:tt0371746',createdAt:serverTimestamp()}));
+ await assertFails(setDoc(doc(d,'titles/untrusted-poster'),{...title('Untrusted','manager'),imdb,poster:'https://evil.example/poster.jpg',createdAt:serverTimestamp()}));
 });
 test('full manager can approve regular users but cannot grant roles or change owner',async()=>{
  const d=db('admin');await assertSucceeds(updateDoc(doc(d,'users/disabled'),{status:'approved',view:true,updatedAt:serverTimestamp()}));

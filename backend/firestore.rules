@@ -114,7 +114,7 @@ service cloud.firestore {
     }
     function titleShape(d) {
       return d.keys().hasAll(['title','date','seconds','kind','episodes','createdBy','createdAt','archived','group','collections','url','poster','priority','reason'])
-        && d.keys().hasOnly(['title','date','seconds','kind','episodes','createdBy','createdAt','archived','group','collections','url','poster','priority','reason'])
+        && d.keys().hasOnly(['title','date','seconds','kind','episodes','createdBy','createdAt','archived','group','collections','url','poster','priority','reason','imdb'])
         && d.title is string && d.title.size() > 0 && d.title.size() <= 250
         && d.date is string && d.date.size() <= 20
         && (d.seconds == null || (d.seconds is int && d.seconds > 0 && d.seconds <= 100000000))
@@ -125,14 +125,20 @@ service cloud.firestore {
         && d.collections[0] == 'marvel'
         && (d.collections.size() == 1 || d.collections[1] == 'mcu')
         && d.url is string && d.url.size() <= 1000 && d.url.matches('https://.*')
-        && d.poster is string && d.poster.size() <= 150
-        && (d.poster == '' || d.poster.matches('assets/[A-Za-z0-9_-]+[.]webp'))
+        && d.poster is string && d.poster.size() <= 500
+        && (d.poster == '' || d.poster.matches('assets/[A-Za-z0-9_-]+[.]webp')
+          || d.poster.matches('imdb:tt[0-9]{7,10}')
+          || d.poster.matches('https://m[.]media-amazon[.]com/images/[^ ]+'))
+        && (!d.keys().hasAny(['imdb'])
+          || (d.imdb is string && d.imdb.matches('https://www[.]imdb[.]com/title/tt[0-9]{7,10}/')))
         && d.priority in ['core','background','optional','later']
         && d.reason is string && d.reason.size() <= 1000;
     }
     match /titles/{id} {
       allow read: if approved();
       allow create: if manage() && titleShape(request.resource.data)
+        && request.resource.data.keys().hasAny(['imdb'])
+        && request.resource.data.poster != ''
         && request.resource.data.createdBy == request.auth.uid
         && request.resource.data.createdAt == request.time && !request.resource.data.archived;
       // Ordinary managers can add but cannot edit or remove existing titles.

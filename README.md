@@ -68,7 +68,7 @@ Nine requested titles now reference distinct local poster files. Six newly sourc
 
 ## Version 1.0.0
 
-The current displayed version is 1.5.11. Advance the patch version when a change is published to GitHub. Skip is a personal saved list separate from watched progress. Skipped titles leave Next to watch, stay uncompleted in statistics, and appear in Skipped Items across routes. Marking a skipped title watched clears its skipped flag. Undo, reset and full backup include the skipped list; old cookies/backups without it remain supported.
+The current displayed version is 1.5.12. Advance the patch version when a change is published to GitHub. Skip is a personal saved list separate from watched progress. Skipped titles leave Next to watch, stay uncompleted in statistics, and appear in Skipped Items across routes. Marking a skipped title watched clears its skipped flag. Undo, reset and full backup include the skipped list; old cookies/backups without it remain supported.
 
 
 ## Version 1.2
@@ -85,6 +85,10 @@ Live countdown to the owner-specified December 18, 2026 at 20:00 Israel time. Da
 
 My lists (lists.html): named swipe builder, right to add, left to pass, up to defer. Deferred cards return after undecided cards. Up to five device-local cookie lists and one resumable draft. Saved lists use global release-date order; the home catalogue groups them by original phase while Next to Watch uses release order. Unknown dates sort last. Existing watched progress is shared. Full backup includes saved lists. Classifications use existing saved RoadToDoomsday metadata.
 
+
+## Version 1.5.12
+
+The Add title form now requires an IMDb title URL and previews a poster suggestion derived from its title ID. A direct IMDb-hosted image URL can override the suggestion. Titles store the IMDb source, poster and watch link, and the home catalog refreshes after a successful save. The new poster fields require publishing the updated `backend/firestore.rules` in Firebase Console; GitHub Pages deployment does not publish Firestore rules.
 
 ## Version 1.5.11
 
