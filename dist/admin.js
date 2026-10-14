@@ -1,29 +1,24 @@
-import './access.js';
+import './access.js?v=1.5.7';
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let api,account,ownerId,allTitles=[],loading=false,loadedUid=null;
 const note=s=>$('#admin-message').textContent=s;
 const authorized=()=>!!account&&(account.manage===true||account.Fmanage===true||!!api?.isOwner);
-const management=$('#management-view'),main=document.querySelector('main');
-const adminPage=document.body.classList.contains('admin-page');
-function showManagement(){
-  // The dedicated admin page avoids mobile hash routing; retain #manage as a backwards-compatible route.
-  const active=adminPage||location.hash==='#manage';
-  main.classList.toggle('management-active',active);
-  management.hidden=!active;$('#manage-nav')?.classList.toggle('active',active);
-  if(active&&!authorized()){
-    $('#admin-content').hidden=true;
-    note(api?.account?'This account does not have management access.':'Checking your management access…');
-  }
-  if(active)window.scrollTo(0,0);
+const management=$('#management-view'),adminModal=$('#admin-modal');
+function openManagement(){
+  management.hidden=false;
+  if(!authorized()){$('#admin-content').hidden=true;note(api?.account?'This account does not have management access.':'Checking your management access…');}
+  if(!adminModal.open)adminModal.showModal();
+  if(authorized())load().catch(()=>note('Could not load management data.'));
 }
-$('#manage-nav')?.addEventListener('click',e=>{
-  e.preventDefault();
-  location.assign('admin.html');
-});
-if(!adminPage)$('#leave-management').onclick=()=>{history.pushState(null,'',location.pathname+location.search);showManagement()};
-window.addEventListener('hashchange',showManagement);window.addEventListener('popstate',showManagement);
-document.querySelector('#sidebar')?.addEventListener('click',e=>{if(e.target.closest('#manage-nav'))return;if(e.target.closest('[data-group],[data-status],[data-settings],#friends-nav')){history.replaceState(null,'',location.pathname+location.search);showManagement()}},true);
-window.addEventListener('marvel-access-change',()=>{api=window.MarvelAccess||api;const was=!!authorized();account=api?.account||null;if(!authorized()){$('#admin-content').hidden=true;showManagement()}else if(!was||location.hash==='#manage')load().catch(()=>note('Could not load management data.'))});
+function closeManagement(){if(adminModal.open)adminModal.close();}
+$('#manage-nav')?.addEventListener('click',openManagement);
+document.addEventListener('marvel-open-management',openManagement);
+$('#leave-management').addEventListener('click',closeManagement);
+$('#close-admin-modal').addEventListener('click',closeManagement);
+adminModal.addEventListener('click',e=>{if(e.target===adminModal)closeManagement()});
+adminModal.addEventListener('close',()=>{management.hidden=true});
+let openFromLink=new URLSearchParams(location.search).get('manage')==='1';
+window.addEventListener('marvel-access-change',()=>{api=window.MarvelAccess||api;const was=!!authorized();account=api?.account||null;if(!authorized()){$('#admin-content').hidden=true;if(adminModal.open)closeManagement()}else if(!was||openFromLink)load().catch(()=>note('Could not load management data.'));if(openFromLink&&authorized()){openFromLink=false;history.replaceState(null,'',location.pathname+location.hash);openManagement()}});
 async function load(){
   if(loading)return;
   loading=true;
@@ -31,10 +26,10 @@ async function load(){
   api=window.MarvelAccess;
   if(!api){note('Account management becomes available after Firebase is configured.');return}
   await api.ready;account=api.account;
-  if(!authorized()){showManagement();return}
+  if(!authorized()){return}
   const uid=api.auth.currentUser?.uid;
-  if(uid&&loadedUid===uid){$('#admin-content').hidden=false;showManagement();return}
-  $('#admin-content').hidden=false;showManagement();note('Management access is ready.');
+  if(uid&&loadedUid===uid){$('#admin-content').hidden=false;return}
+  $('#admin-content').hidden=false;note('Management access is ready.');
   const {db,firestore:f}=api;
   if(account.Fmanage||api.isOwner){
     $('#user-section').hidden=false;$('#title-section').hidden=false;
