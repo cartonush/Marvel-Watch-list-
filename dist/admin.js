@@ -1,4 +1,4 @@
-import './access.js?v=1.5.12';
+import './access.js?v=1.5.13';
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function imdbId(value){try{const u=new URL(value.trim());if(u.protocol!=='https:'||!['imdb.com','www.imdb.com','m.imdb.com'].includes(u.hostname))return null;return /^\/title\/(tt\d{7,10})\/?$/.exec(u.pathname)?.[1]||null}catch{return null}}
 function directPoster(value){try{const u=new URL(value.trim());return u.protocol==='https:'&&u.hostname==='m.media-amazon.com'&&u.pathname.startsWith('/images/')&&!u.username&&!u.password?u.href:null}catch{return null}}
@@ -112,6 +112,9 @@ async function requests(){
   $('#admin-requests').innerHTML='<h3>Removal requests</h3>'+(pending.length?pending.map(r=>`<div class="admin-row"><div><strong>${esc(allTitles.find(x=>x.id===r.data().titleId)?.title||r.data().titleId)}</strong><small>${esc(r.data().reason)}</small></div>${api.auth.currentUser.uid===ownerId?`<button class="secondary" data-archive="${esc(r.id)}">Approve archival</button><button class="secondary" data-reject="${esc(r.id)}">Reject</button>`:''}</div>`).join(''):'<p class="subtle">No pending requests.</p>');
 }
 const addForm=$('#add-title'),posterPreview=$('#add-poster-preview'),posterStatus=$('#add-poster-status');
+const addMessage=$('#add-title-message'),viewAdded=$('#view-added-title');
+function addNote(message,error=false){addMessage.textContent=message;addMessage.dataset.error=error?'true':'false';note(message);}
+viewAdded.addEventListener('click',()=>{exitManagement();$('#collection')?.scrollIntoView({behavior:'smooth',block:'start'});});
 function selectedPoster(){
   const id=imdbId(addForm.elements.imdb.value),custom=addForm.elements.posterUrl.value.trim();
   if(!id)return {error:'Paste an IMDb title link such as https://www.imdb.com/title/tt0371746/.'};
@@ -129,16 +132,17 @@ function updatePosterPreview(){
 }
 addForm.elements.imdb.addEventListener('input',updatePosterPreview);
 addForm.elements.posterUrl.addEventListener('input',updatePosterPreview);
+addForm.addEventListener('input',()=>{viewAdded.hidden=true;if(addMessage.textContent)addMessage.textContent=''});
 $('#add-title').onsubmit=async e=>{e.preventDefault();if(!authorized())return;const form=e.currentTarget,v=new FormData(form),f=api.firestore,date=String(v.get('date')).trim(),url=String(v.get('url')||'').trim(),choice=selectedPoster();
-  if(choice.error){note(choice.error);return}
-  if(posterPreview.dataset.poster!==choice.value||posterPreview.dataset.ready!=='yes'){note('Wait for the poster preview, or paste a working direct poster image link.');return}
-  if(!/^(\d{2}\/\d{2}\/\d{4}|\d{4}|Unknown)$/.test(date)){note('Use DD/MM/YYYY, YYYY, or Unknown.');return}
-  if(url&&(!/^https:\/\//i.test(url)||url.length>1000)){note('Use a valid HTTPS link.');return}
+  if(choice.error){addNote(choice.error,true);return}
+  if(posterPreview.dataset.poster!==choice.value||posterPreview.dataset.ready!=='yes'){addNote('Wait for the poster preview, or paste a working direct poster image link.',true);return}
+  if(!/^(\d{2}\/\d{2}\/\d{4}|\d{4}|Unknown)$/.test(date)){addNote('Use DD/MM/YYYY, YYYY, or Unknown.',true);return}
+  if(url&&(!/^https:\/\//i.test(url)||url.length>1000)){addNote('Use a valid HTTPS link.',true);return}
   const group=String(v.get('group')),mcu=v.has('mcu'),seconds=v.get('minutes')?Math.round(Number(v.get('minutes'))*60):null;
   const item={title:String(v.get('title')).trim(),date,seconds,kind:String(v.get('kind')),episodes:Number(v.get('episodes')),group,collections:mcu?['marvel','mcu']:['marvel'],url:url||`https://www.imdb.com/title/${choice.id}/`,imdb:`https://www.imdb.com/title/${choice.id}/`,poster:choice.value,priority:'later',reason:'Added by a catalog manager.',archived:false,createdBy:api.auth.currentUser.uid,createdAt:f.serverTimestamp()};
-  const submit=form.querySelector('button.primary');submit.disabled=true;note('Adding title…');
-  try{await f.addDoc(f.collection(api.db,'titles'),item);note(`Title added to ${mcu?'All MCU and All Marvel':'All Marvel'} and the full collection.`);form.reset();posterPreview.hidden=true;posterPreview.dataset.ready='no';posterStatus.textContent='Paste the IMDb title link to load a poster suggestion.';window.dispatchEvent(new Event('marvel-catalog-change'));if(account.Fmanage||api.isOwner)void titles().catch(()=>note('Title saved. Reload management to refresh the title list.'))}
-  catch(error){note(error?.code==='permission-denied'?'Could not add title. Publish the updated Firestore rules for IMDb posters, then try again.':'Could not add title. '+(error?.message||'Please try again.'))}
+  const submit=form.querySelector('button.primary');submit.disabled=true;addNote('Adding title…');
+  try{const saved=await f.addDoc(f.collection(api.db,'titles'),item);form.reset();posterPreview.hidden=true;posterPreview.dataset.ready='no';posterStatus.textContent='Paste the IMDb title link to load a poster suggestion.';addNote(`Saved: ${item.title}. It is in ${mcu?'All MCU and All Marvel':'All Marvel'}.`);viewAdded.hidden=false;window.dispatchEvent(new CustomEvent('marvel-catalog-change',{detail:{id:saved.id}}));if(account.Fmanage||api.isOwner)void titles().catch(()=>addNote('Title saved. Reload management to refresh the title list.'))}
+  catch(error){addNote(error?.code==='permission-denied'?'Could not add title. Publish the updated Firestore rules for IMDb posters, then try again.':'Could not add title. '+(error?.message||'Please try again.'),true)}
   finally{submit.disabled=false}};
 $('#basic-settings').onsubmit=async e=>{e.preventDefault();if(!authorized())return;const f=api.firestore,v=new FormData(e.currentTarget);
   try{await f.setDoc(f.doc(api.db,'settings/basic'),{announcement:String(v.get('announcement')).slice(0,1000),defaultTheme:String(v.get('defaultTheme')),updatedAt:f.serverTimestamp(),updatedBy:api.auth.currentUser.uid});note('Settings saved.')}catch{note('Could not save settings.')}};

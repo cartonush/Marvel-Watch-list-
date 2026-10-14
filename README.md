@@ -8,7 +8,7 @@ Static output is `dist/`. Firebase project `marvel-list-database` is configured.
 
 ## Data
 
-`dist/data.json` contains 344 titles, including the earlier 110-title watchlist, the Wikipedia-based MCU collection and the expanded All Marvel collection. The existing title positions are preserved for saved progress. Data is a snapshot, not live synchronization. `watched` holds the source's checked titles for opt-in additive import; new visitors start fresh. Poster provenance is recorded per item.
+`dist/data.json` contains 137 titles: the earlier 110-title watchlist plus 27 Wikipedia-based MCU additions. The 207 Wikipedia-only titles outside MCU and Doomsday have been removed. Progress from the former 344-title catalog is mapped to the retained titles by the historical position map. Data is a snapshot, not live synchronization. `watched` holds the source's checked titles for opt-in additive import; new visitors start fresh. Poster provenance is recorded per item.
 
 The source's unusual dates are preserved and explained in the data dialog. Runtime estimates for partly completed seasons divide total season duration evenly by episode count.
 
@@ -24,7 +24,7 @@ Run `node --check dist/app.js` and `node validate.mjs`. No managed preview was l
 
 ## Updating
 
-Preserve item IDs and array positions for cookie and backup compatibility. New entries are appended; the separate order field controls viewing order. Legacy 84-entry cookies, friend codes, and backups are padded with two unwatched entries. Road to Doomsday contains X-Men/Deadpool and optional Daredevil/Defenders subsections. The next-title queue follows the selected collection. `extract-source.py` is a one-off XML-based importer from the task's source workbook; do not rerun it without reapplying posters. `download-posters.py` records provenance and optimizes local poster assets from MCU API and the mcu-flowchart poster collection.
+Preserve item IDs and the historical position map for cookie and backup compatibility. New entries are appended; the separate order field controls viewing order. Legacy 84-entry cookies, friend codes, and backups are padded with unwatched entries. Road to Doomsday contains X-Men/Deadpool and optional Daredevil/Defenders subsections. The next-title queue follows the selected collection. `extract-source.py` is a one-off XML-based importer from the task's source workbook; do not rerun it without reapplying posters. `download-posters.py` records provenance and optimizes local poster assets from MCU API and the mcu-flowchart poster collection.
 
 ## Added title sources
 
@@ -68,7 +68,7 @@ Nine requested titles now reference distinct local poster files. Six newly sourc
 
 ## Version 1.0.0
 
-The current displayed version is 1.5.12. Advance the patch version when a change is published to GitHub. Skip is a personal saved list separate from watched progress. Skipped titles leave Next to watch, stay uncompleted in statistics, and appear in Skipped Items across routes. Marking a skipped title watched clears its skipped flag. Undo, reset and full backup include the skipped list; old cookies/backups without it remain supported.
+The current displayed version is 1.5.13. Advance the patch version when a change is published to GitHub. Skip is a personal saved list separate from watched progress. Skipped titles leave Next to watch, stay uncompleted in statistics, and appear in Skipped Items across routes. Marking a skipped title watched clears its skipped flag. Undo, reset and full backup include the skipped list; old cookies/backups without it remain supported.
 
 
 ## Version 1.2
@@ -137,8 +137,12 @@ Fixed swipe movement and scroll anchoring in the personal-list builder. Vertical
 
 ## Wikipedia catalog expansion — 2026-10-13
 
-All MCU (based on Wikipedia): 118 entries. All Marvel: 344 entries, 234 newly added. See dist/catalog-additions.txt for scope, sources, additions and reused titles. Existing IDs/order, runtime and watch URLs are retained. Historical release-date corrections are recorded in originalDate/dateSource. Built-in collections are selectable on home and My Lists. Large saved lists use verified chunked cookies. The owner requested the next version, 1.5.2.
+All MCU (based on Wikipedia): 118 entries. All Marvel: 137 entries, with 207 unrelated Wikipedia additions removed. See dist/catalog-additions.txt for scope, sources, additions and reused titles. Existing IDs/order, runtime and watch URLs are retained. Historical release-date corrections are recorded in originalDate/dateSource. Built-in collections are selectable on home and My Lists. Large saved lists use verified chunked cookies. The owner requested the next version, 1.5.2.
 
 Run `node validate.mjs` for the legacy 1.5.1 regression fixture, then `node test-catalog.mjs` for expanded catalog/storage migration. Browser QA is unavailable in this session. `backend/` contains the active username-only Firestore rules and owner bootstrap instructions. Authentication and authorization code is present; publish the matching rules and initialize the owner UID before inviting users. The static catalog remains public at its URL.
 
 Management opens in an in-app dialog for approved Manager, Senior manager (Fmanage), or Owner accounts. Firestore rules enforce every management operation; the route and menu visibility are UI gates only. One-time owner setup remains a privileged Firebase Console/Admin SDK action.
+
+## Version 1.5.13
+
+Removed 207 Wikipedia-only titles outside the MCU and Road to Doomsday. The original 110 and 27 additional MCU titles remain. Historical positional progress is migrated to the 137-title catalog by saved index mapping; older ID-keyed backups and personal lists discard retired titles. Add Title displays save errors beside the submit button and reveals a View added title action, which opens the saved title in All Marvel. IMDb URL and working poster preview remain required; publish backend/firestore.rules in Firebase Console for new title creation.

@@ -1,0 +1,386 @@
+CURRENT CATALOG: 137 titles (118 MCU, 19 Road to Doomsday outside MCU).
+The 207 Wikipedia-only additions outside both collections were removed in version 1.5.13.
+The following is a historical record of the earlier Wikipedia import; retired titles listed here are not in the current catalog.
+
+MARVEL WATCH — CATALOG UPDATE
+Snapshot: 2026-10-13
+Displayed version: 1.5.1 (not advanced without an explicit request)
+
+All MCU (based on Wikipedia): 118 entries; 27 newly added to the site.
+All Marvel: 344 entries; 234 newly added to the site.
+Existing 110 title IDs, runtimes, watch links and progress positions are preserved.
+New MCU seasons are separate entries; new non-MCU shows are generally whole-series entries.
+Includes released and announced narrative screen adaptations, animation, shorts and Marvel imprints.
+MCU companion entries are marked separately; inclusion is not a claim of main-timeline canon.
+Excludes comics, games, documentaries, unaired pilots and TV programming blocks.
+Unknown runtimes and posters are left unfilled. Information links are not streaming links.
+Year-only dates mean exact ordering within that year is unverified.
+
+SOURCES
+https://en.wikipedia.org/wiki/Marvel_Cinematic_Universe
+https://en.wikipedia.org/wiki/List_of_films_based_on_Marvel_Comics_publications
+https://en.wikipedia.org/wiki/List_of_television_series_based_on_Marvel_Comics_publications
+
+NEW TITLES ADDED TO ALL MCU (also included in All Marvel)
+- Team Thor | 2016 | bonus | released
+- Team Thor: Part 2 | 2017 | bonus | released
+- Team Darryl | 2018 | bonus | released
+- Peter's To-Do List | 2019 | shorts | released
+- Agents of S.H.I.E.L.D. Season 2 | 23/09/2014 | legacy | released
+- Agents of S.H.I.E.L.D. Season 3 | 29/09/2015 | legacy | released
+- Agents of S.H.I.E.L.D. Season 4 | 20/09/2016 | legacy | released
+- Agents of S.H.I.E.L.D. Season 5 | 01/12/2017 | legacy | released
+- Agents of S.H.I.E.L.D. Season 6 | 10/05/2019 | legacy | released
+- Agents of S.H.I.E.L.D. Season 7 | 27/05/2020 | legacy | released
+- Runaways Season 1 | 21/11/2017 | legacy | released
+- Runaways Season 2 | 21/12/2018 | legacy | released
+- Runaways Season 3 | 13/12/2019 | legacy | released
+- Cloak & Dagger Season 1 | 07/06/2018 | legacy | released
+- Cloak & Dagger Season 2 | 04/04/2019 | legacy | released
+- Inhumans Season 1 | 29/09/2017 | legacy | released
+- Agents of S.H.I.E.L.D.: Slingshot | 2016 | legacy | released
+- WHIH Newsfront | 2015 | bonus | released
+- The Daily Bugle — MCU seasons 1–2 | 2019 | bonus | released
+- Daredevil: Born Again Season 3 | 2027 | 6 | upcoming
+- Your Friendly Neighborhood Spider-Man Season 2 | 2027 | 6 | upcoming
+- Your Friendly Neighborhood Spider-Man Season 3 | Unknown | future | upcoming
+- Marvel Zombies Season 2 | Unknown | future | upcoming
+- Zodiac | 2028 | future | upcoming
+- Marvel Zombies: The Winter Soldier | 2027 | future | upcoming
+- Marvel Zombies: The Fist of Khonshu | 2028 | future | upcoming
+- Marvel Zombies: The Last Guardian | 2029 | future | upcoming
+
+NEW TITLES ADDED TO ALL MARVEL (complete additions, including MCU)
+- Howard the Duck | 1986 | Marvel films | released
+- Blade | 21/08/1998 | Marvel films | released
+- Blade II | 22/03/2002 | Marvel films | released
+- Daredevil | 14/02/2003 | Marvel films | released
+- Hulk | 2003 | Marvel films | released
+- The Punisher | 2004 | Marvel films | released
+- Blade: Trinity | 08/12/2004 | Marvel films | released
+- Elektra | 14/01/2005 | Marvel films | released
+- Fantastic Four | 08/07/2005 | Marvel films | released
+- Ghost Rider | 2007 | Marvel films | released
+- Fantastic Four: Rise of the Silver Surfer | 15/06/2007 | Marvel films | released
+- Punisher: War Zone | 2008 | Marvel films | released
+- Ghost Rider: Spirit of Vengeance | 2011 | Marvel films | released
+- Fantastic Four | 2015 | Marvel films | released
+- Venom | 05/10/2018 | Marvel films | released
+- The New Mutants | 28/08/2020 | Marvel films | released
+- Venom: Let There Be Carnage | 01/10/2021 | Marvel films | released
+- Morbius | 01/04/2022 | Marvel films | released
+- Madame Web | 14/02/2024 | Marvel films | released
+- Venom: The Last Dance | 25/10/2024 | Marvel films | released
+- Kraven the Hunter | 13/12/2024 | Marvel films | released
+- Captain America (1944 serial) | 1944 | Marvel films | released
+- Spider-Man (1978 short film) | 1978 | Marvel films | released
+- Team Thor | 2016 | MCU companion shorts | released
+- Team Thor: Part 2 | 2017 | MCU companion shorts | released
+- No Good Deed | 2017 | Marvel films | released
+- Team Darryl | 2018 | MCU companion shorts | released
+- Peter's To-Do List | 2019 | MCU shorts | released
+- Deadpool and Korg React | 2021 | Marvel films | released
+- Kick-Ass | 2010 | Marvel imprints | released
+- Kick-Ass 2 | 2013 | Marvel imprints | released
+- Kingsman: The Secret Service | 2014 | Marvel imprints | released
+- Kingsman: The Golden Circle | 2017 | Marvel imprints | released
+- The King's Man | 2021 | Marvel imprints | released
+- Argylle | 2024 | Marvel imprints | released
+- Stuntnuts: The Movie | Unknown | Marvel imprints | upcoming
+- Stuntnuts Does School Fight | Unknown | Marvel imprints | upcoming
+- Men in Black | 1997 | Marvel imprints | released
+- Men in Black II | 2002 | Marvel imprints | released
+- Men in Black 3 | 2012 | Marvel imprints | released
+- Men in Black: International | 2019 | Marvel imprints | released
+- Hardcase | 1993 | Marvel imprints | released
+- Firearm | 1993 | Marvel imprints | released
+- Dr. Strange | 1978 | Marvel films | released
+- Captain America (1979) | 1979 | Marvel films | released
+- Captain America II: Death Too Soon | 1979 | Marvel films | released
+- The Incredible Hulk Returns | 1988 | Marvel films | released
+- The Trial of the Incredible Hulk | 1989 | Marvel films | released
+- The Punisher | 1989 | Marvel films | released
+- The Death of the Incredible Hulk | 1990 | Marvel films | released
+- Captain America (1990) | 1990 | Marvel films | released
+- Generation X | 1996 | Marvel films | released
+- Nick Fury: Agent of S.H.I.E.L.D. | 1998 | Marvel films | released
+- Man-Thing | 2005 | Marvel films | released
+- Spider-Man (1977 film) | 1977 | Marvel films | released
+- The Incredible Hulk (1977 film) | 1977 | Marvel films | released
+- Return of the Incredible Hulk (1977 film) | 1977 | Marvel films | released
+- The Incredible Hulk: Married | 1978 | Marvel films | released
+- Spider-Man Strikes Back | 1978 | Marvel films | released
+- Spider-Man: The Dragon's Challenge | 1981 | Marvel films | released
+- Blade: House of Chthon | 2006 | Marvel films | released
+- Nightman: World Premiere | 1997 | Marvel imprints | released
+- Big Hero 6 | 2014 | Marvel animation | released
+- Spider-Man: Into the Spider-Verse | 2018 | Marvel animation | released
+- Spider-Man: Across the Spider-Verse | 2023 | Marvel animation | released
+- Spider-Man: Beyond the Spider-Verse | 2027 | Marvel animation | upcoming
+- Dracula: Sovereign of the Damned | 1980 | Marvel animation | released
+- Kyoufu Densetsu Kaiki! Frankenstein | 1981 | Marvel animation | released
+- Ultimate Avengers | 2006 | Marvel animation | released
+- Ultimate Avengers 2 | 2006 | Marvel animation | released
+- The Invincible Iron Man | 2007 | Marvel animation | released
+- Doctor Strange: The Sorcerer Supreme | 2007 | Marvel animation | released
+- Next Avengers: Heroes of Tomorrow | 2008 | Marvel animation | released
+- Hulk Versus | 2009 | Marvel animation | released
+- Planet Hulk | 2010 | Marvel animation | released
+- Thor: Tales of Asgard | 2011 | Marvel animation | released
+- Iron Man: Rise of Technovore | 2013 | Marvel animation | released
+- Iron Man & Hulk: Heroes United | 2013 | Marvel animation | released
+- Avengers Confidential: Black Widow & Punisher | 2014 | Marvel animation | released
+- Iron Man & Captain America: Heroes United | 2014 | Marvel animation | released
+- Marvel Super Hero Adventures: Frost Fight! | 2015 | Marvel animation | released
+- Hulk: Where Monsters Dwell | 2016 | Marvel animation | released
+- Marvel Rising: Secret Warriors | 2018 | Marvel animation | released
+- Baymax Returns | 2017 | Marvel animation | released
+- Marvel Super Heroes 4D (London) | 2010 | Marvel animation | released
+- Marvel Super Heroes 4D (New York) | 2012 | Marvel animation | released
+- Marvel Super Heroes 4D (Las Vegas) | 2013 | Marvel animation | released
+- Marvel Super Heroes 4D (Bali) | 2013 | Marvel animation | released
+- Marvel Super Heroes 4D (Sentosa) | 2017 | Marvel animation | released
+- Marvel Rising: Chasing Ghosts | 2019 | Marvel animation | released
+- Spider-Ham: Caught in a Ham | 2019 | Marvel animation | released
+- Marvel Rising: Heart of Iron | 2019 | Marvel animation | released
+- Marvel Rising: Battle of the Bands | 2019 | Marvel animation | released
+- Marvel Rising: Operation Shuri | 2019 | Marvel animation | released
+- Marvel Rising: Playing with Fire | 2019 | Marvel animation | released
+- The Spider Within: A Spider-Verse Story | 2023 | Marvel animation | released
+- Lego Marvel Super Heroes: Maximum Overload | 2013 | Marvel animation | released
+- Lego Marvel Super Heroes: Avengers Reassembled | 2015 | Marvel animation | released
+- Lego Marvel Super Heroes - Guardians of the Galaxy: The Thanos Threat | 2017 | Marvel animation | released
+- Lego Marvel Super Heroes - Black Panther: Trouble in Wakanda | 2018 | Marvel animation | released
+- Lego Marvel Spider-Man: Vexed by Venom | 2019 | Marvel animation | released
+- Lego Marvel Avengers: Loki in Training | 2021 | Marvel animation | released
+- Lego Marvel Avengers: Time Twisted | 2022 | Marvel animation | released
+- Lego Marvel Avengers: Code Red | 2023 | Marvel animation | released
+- Lego Marvel Avengers: Mission Demolition | 2024 | Marvel animation | released
+- #TBT to That Time Archer Met Kingsman | 2017 | Marvel imprints | released
+- Agents of S.H.I.E.L.D. Season 2 | 23/09/2014 | Marvel Television | released
+- Agents of S.H.I.E.L.D. Season 3 | 29/09/2015 | Marvel Television | released
+- Agents of S.H.I.E.L.D. Season 4 | 20/09/2016 | Marvel Television | released
+- Agents of S.H.I.E.L.D. Season 5 | 01/12/2017 | Marvel Television | released
+- Agents of S.H.I.E.L.D. Season 6 | 10/05/2019 | Marvel Television | released
+- Agents of S.H.I.E.L.D. Season 7 | 27/05/2020 | Marvel Television | released
+- Runaways Season 1 | 21/11/2017 | Marvel Television | released
+- Runaways Season 2 | 21/12/2018 | Marvel Television | released
+- Runaways Season 3 | 13/12/2019 | Marvel Television | released
+- Cloak & Dagger Season 1 | 07/06/2018 | Marvel Television | released
+- Cloak & Dagger Season 2 | 04/04/2019 | Marvel Television | released
+- Inhumans Season 1 | 29/09/2017 | Marvel Television | released
+- Agents of S.H.I.E.L.D.: Slingshot | 2016 | Marvel Television | released
+- WHIH Newsfront | 2015 | MCU companion shorts | released
+- The Daily Bugle — MCU seasons 1–2 | 2019 | MCU companion shorts | released
+- The Daily Bugle — Morbius season 3 | 2022 | Marvel shorts & web series | released
+- Daredevil: Born Again Season 3 | 2027 | MCU | upcoming
+- Your Friendly Neighborhood Spider-Man Season 2 | 2027 | MCU | upcoming
+- Your Friendly Neighborhood Spider-Man Season 3 | Unknown | MCU | upcoming
+- X-Men ’97 Season 3 | Unknown | Marvel animation | upcoming
+- Marvel Zombies Season 2 | Unknown | MCU | upcoming
+- Zodiac | 2028 | MCU | upcoming
+- Spidey Super Stories | 1974 | Marvel live-action television | released
+- The Amazing Spider-Man (1977 TV series) | 1977 | Marvel live-action television | released
+- The Incredible Hulk (1977 TV series) | 1977 | Marvel live-action television | released
+- Spider-Man (1978 TV series) | 1978 | Marvel live-action television | released
+- Blade: The Series | 2006 | Marvel live-action television | released
+- Legion | 2017 | Marvel live-action television | released
+- The Gifted | 2017 | Marvel live-action television | released
+- Helstrom | 16/10/2020 | Marvel live-action television | released
+- Spider-Noir | 2026 | Marvel live-action television | released
+- Clone Saga | Unknown | Marvel live-action television | upcoming
+- Battle Fever J | 1979 | Marvel live-action television | released
+- Denshi Sentai Denjiman | 1980 | Marvel live-action television | released
+- Taiyo Sentai Sun Vulcan | 1981 | Marvel live-action television | released
+- Mutant X | 2001 | Marvel live-action television | released
+- Night Man | 1997 | Marvel imprints | released
+- Powers | 2015 | Marvel imprints | released
+- Criminal | 2026 | Marvel imprints | upcoming
+- Power Pack (1991 pilot) | 1991 | Marvel live-action television | released
+- The Marvel Super Heroes | 1966 | Marvel animation | released
+- The Fantastic Four | 1967 | Marvel animation | released
+- Spider-Man (1967 animated series) | 1967 | Marvel animation | released
+- The New Fantastic Four | 1978 | Marvel animation | released
+- Fred and Barney Meet the Thing | 1979 | Marvel animation | released
+- Spider-Woman | 1979 | Marvel animation | released
+- Spider-Man (1981 animated series) | 1981 | Marvel animation | released
+- Spider-Man and His Amazing Friends | 1981 | Marvel animation | released
+- The Incredible Hulk (1982 animated series) | 1982 | Marvel animation | released
+- X-Men: The Animated Series | 1992 | Marvel animation | released
+- Iron Man (1994 animated series) | 1994 | Marvel animation | released
+- Fantastic Four (1994 animated series) | 1994 | Marvel animation | released
+- Spider-Man: The Animated Series | 1994 | Marvel animation | released
+- The Incredible Hulk (1996 animated series) | 1996 | Marvel animation | released
+- Silver Surfer | 1998 | Marvel animation | released
+- Spider-Man Unlimited | 1999 | Marvel animation | released
+- The Avengers: United They Stand | 1999 | Marvel animation | released
+- X-Men: Evolution | 2000 | Marvel animation | released
+- Spider-Man: The New Animated Series | 2003 | Marvel animation | released
+- Fantastic Four: World's Greatest Heroes | 2006 | Marvel animation | released
+- The Spectacular Spider-Man | 2008 | Marvel animation | released
+- Wolverine and the X-Men | 2009 | Marvel animation | released
+- Iron Man: Armored Adventures | 2009 | Marvel animation | released
+- The Super Hero Squad Show | 2009 | Marvel animation | released
+- The Avengers: Earth's Mightiest Heroes | 2010 | Marvel animation | released
+- Marvel Anime: Iron Man | 2010 | Marvel animation | released
+- Marvel Anime: Wolverine | 2011 | Marvel animation | released
+- Marvel Anime: X-Men | 2011 | Marvel animation | released
+- Marvel Anime: Blade | 2011 | Marvel animation | released
+- Ultimate Spider-Man | 2012 | Marvel animation | released
+- Avengers Assemble | 2013 | Marvel animation | released
+- Hulk and the Agents of S.M.A.S.H. | 2013 | Marvel animation | released
+- Marvel Disk Wars: The Avengers | 2014 | Marvel animation | released
+- Guardians of the Galaxy (2015 animated series) | 2015 | Marvel animation | released
+- Marvel Future Avengers | 2017 | Marvel animation | released
+- Marvel's Spider-Man | 2017 | Marvel animation | released
+- Big Hero 6: The Series | 2017 | Marvel animation | released
+- M.O.D.O.K. | 2021 | Marvel animation | released
+- Hit-Monkey | 2021 | Marvel animation | released
+- Moon Girl and Devil Dinosaur | 2023 | Marvel animation | released
+- Spidey and His Amazing Friends | 2021 | Marvel animation | released
+- Iron Man and His Awesome Friends | 2025 | Marvel animation | released
+- Avengers: Mightiest Friends | 2027 | Marvel animation | upcoming
+- Ultraforce | 1994 | Marvel imprints | released
+- Men in Black: The Series | 1997 | Marvel imprints | released
+- Super Crooks | 2021 | Marvel imprints | released
+- Solarman (pilot) | 1988 | Marvel animation | released
+- X-Men: Pryde of the X-Men (pilot) | 1989 | Marvel animation | released
+- Marvel: All Winners Squad (pilot) | 2012 | Marvel animation | released
+- Phineas and Ferb: Mission Marvel | 2013 | Marvel animation | released
+- Spidey and Iron Man: Avengers Team-Up! | 2025 | Marvel animation | released
+- Spidey and the Avengers: Halloween Team-Up! | 2026 | Marvel animation | released
+- Marvel Zombies: The Winter Soldier | 2027 | MCU | upcoming
+- Marvel Zombies: The Fist of Khonshu | 2028 | MCU | upcoming
+- Marvel Zombies: The Last Guardian | 2029 | MCU | upcoming
+- Astonishing X-Men: Gifted | 2009 | Marvel shorts & web series | released
+- Black Panther (2010 animated series) | 2010 | Marvel shorts & web series | released
+- Iron Man: Extremis | 2010 | Marvel shorts & web series | released
+- Spider-Woman: Agent of S.W.O.R.D. | 2011 | Marvel shorts & web series | released
+- Thor / Loki: Blood Brothers | 2011 | Marvel shorts & web series | released
+- Astonishing X-Men: Dangerous | 2012 | Marvel shorts & web series | released
+- Astonishing X-Men: Torn | 2012 | Marvel shorts & web series | released
+- Astonishing X-Men: Unstoppable | 2012 | Marvel shorts & web series | released
+- Inhumans (2013 animated series) | 2013 | Marvel shorts & web series | released
+- Wolverine: Origin | 2013 | Marvel shorts & web series | released
+- Ultimate Wolverine Vs. Hulk | 2013 | Marvel shorts & web series | released
+- Wolverine Versus Sabretooth | 2014 | Marvel shorts & web series | released
+- Wolverine: Weapon X: Tomorrow Dies Today | 2014 | Marvel shorts & web series | released
+- Eternals (2014 animated series) | 2014 | Marvel shorts & web series | released
+- Wolverine Versus Sabretooth: Reborn | 2015 | Marvel shorts & web series | released
+- Fury Files | 2012 | Marvel shorts & web series | released
+- Marvel Video Comics a.k.a. Marvel Ultimate Comics | 2016 | Marvel shorts & web series | released
+- Marvel Funko Shorts | 2016 | Marvel shorts & web series | released
+- Marvel's Rocket & Groot | 2017 | Marvel shorts & web series | released
+- Marvel's Ant-Man | 2017 | Marvel shorts & web series | released
+- Marvel Super Hero Adventures | 2017 | Marvel shorts & web series | released
+- Marvel Rising: Initiation | 2018 | Marvel shorts & web series | released
+- Baymax And | 2018 | Marvel shorts & web series | released
+- Baymax Dreams | 2018 | Marvel shorts & web series | released
+- Big Chibi 6 The Shorts | 2018 | Marvel shorts & web series | released
+- Baymax & Mochi | 2019 | Marvel shorts & web series | released
+- Marvel Battleworld | 2020 | Marvel shorts & web series | released
+- Baymax! | 2022 | Marvel shorts & web series | released
+- Marvel Superheroes: What the--?! | 2009 | Marvel shorts & web series | released
+- Meet Spidey and His Amazing Friends | 2021 | Marvel shorts & web series | released
+- Meet Iron Man and His Awesome Friends | 2025 | Marvel shorts & web series | released
+- Lego Marvel Avengers: Climate Conundrum | 2020 | Marvel animation | released
+- Lego Marvel Avengers: Strange Tails | 2025 | Marvel animation | released
+
+EXISTING TITLES REUSED IN ALL MCU
+- Iron Man | 02/05/2008
+- The Incredible Hulk | 13/06/2008
+- Iron Man 2 | 07/05/2010
+- Thor | 06/05/2011
+- Captain America: The First Avenger | 22/07/2011
+- The Avengers | 04/05/2012
+- Iron Man 3 | 03/05/2013
+- Thor: The Dark World | 08/11/2013
+- Captain America: the winter soldier | 04/04/2014
+- Guardians Of The Galaxy | 01/08/2014
+- Avengers: Age of Ultron | 01/05/2015
+- Ant-Man | 17/07/2015
+- Captain America: Civil War | 06/05/2016
+- Doctor Strange | 04/11/2016
+- Guardians Of The Galaxy Vol. 2 | 05/05/2017
+- Spider-Man: Homecoming | 07/07/2017
+- Thor: Ragnarok | 03/11/2017
+- Black Panther | 16/02/2018
+- Avengers: Infinity War | 27/04/2018
+- Ant-Man And The Wasp | 06/07/2018
+- Captain Marvel | 08/03/2019
+- Avengers: Endgame | 26/04/2019
+- Spider-Man: Far From Home | 02/07/2019
+- WandaVision | 15/01/2021
+- The Falcon and the Winter Soldier | 19/03/2021
+- Loki Season 1 | 09/06/2021
+- Black Widow | 09/07/2021
+- What If...? Season 1 | 11/08/2021
+- Shang-Chi and the Legend of the Ten Rings | 03/09/2021
+- Eternals | 05/11/2021
+- hawkeye | 24/11/2021
+- Spider-Man: No Way Home | 17/12/2021
+- moon knight | 30/03/2022
+- Doctor Strange In The Multiverse of Madness | 06/05/2022
+- Ms. Marvel | 08/06/2022
+- Thor: Love And Thunder | 08/07/2022
+- I Am Groot Season 1 | 10/08/2022
+- She-Hulk: Attorney at Law | 18/08/2022
+- werewolf by night | 07/10/2022
+- Black Panther: Wakanda Forever | 11/11/2022
+- The Guardians of the Galaxy Holiday Special | 25/11/2022
+- Ant-Man And The Wasp: Quantumania | 17/02/2023
+- Guardians Of The Galaxy Vol. 3 | 05/05/2023
+- secret invasion | 21/06/2023
+- I Am Groot Season 2 | 06/09/2023
+- loki season 2 | 05/10/2023
+- The Marvels | 10/11/2023
+- What If...? Season 2 | 22/12/2023
+- echo | 09/01/2024
+- Deadpool & Wolverine | 26/07/2024
+- Agatha all along | 18/09/2024
+- What If...? Season 3 | 22/12/2024
+- Your Friendly Neighborhood Spider-Man Season 1 | 29/01/2025
+- Captain America: Brave New World | 14/02/2025
+- Daredevil: Born Again Season 1 | 04/03/2025
+- Thunderbolts* | 02/05/2025
+- ironheart | 24/06/2025
+- The Fantastic Four: First Steps | 25/07/2025
+- eyes of wakanda | 01/08/2025
+- marvel zombies | 24/09/2025
+- Wonder Man | 27/01/2026
+- Spider-Man: Brand New Day | 31/07/2026
+- VisionQuest | 14/10/2026
+- Avengers: Doomsday | 18/12/2026
+- Avengers: Secret Wars | 17/12/2027
+- Untitled X-Men film | 05/05/2028
+- Ghost Rider | 28/07/2028
+- Black Panther III | 15/12/2028
+- Daredevil season 1 | 10/04/2015
+- Jessica Jones Season 1 | 20/11/2015
+- Daredevil Season 2 | 18/03/2016
+- The Punisher Season 1 | 17/11/2017
+- Daredevil Season 3 | 19/10/2018
+- The Punisher Season 2 | 18/01/2019
+- Daredevil: Born Again Season 2 | 24/03/2026
+- The Punisher: One Last Kill | 12/05/2026
+- The Defenders | 18/08/2017
+- Agent Carter Season 1 | 06/01/2015
+- Agent Carter Season 2 | 19/01/2016
+- Marvel One-Shot: The Consultant | 13/09/2011
+- Marvel One-Shot: A Funny Thing Happened on the Way to Thor’s Hammer | 25/10/2011
+- Marvel One-Shot: Item 47 | 25/09/2012
+- Marvel One-Shot: Agent Carter | 24/09/2013
+- Marvel One-Shot: All Hail the King | 25/02/2014
+- Agents of S.H.I.E.L.D. Season 1 | 24/09/2013
+- Luke Cage Season 1 | 30/09/2016
+- Luke Cage Season 2 | 22/06/2018
+- Iron Fist Season 1 | 17/03/2017
+- Iron Fist Season 2 | 07/09/2018
+- Jessica Jones Season 2 | 08/03/2018
+- Jessica Jones Season 3 | 14/06/2019
+
+Existing titles not listed in All MCU remain in All Marvel and the original collection.
+ACCESS SYSTEM STATUS
+Firebase rules, owner bootstrap and authorization tests are prepared in backend/.
+Registration, account management UI and server enforcement are not yet activated.
+Required next: Firebase project configuration and confirmed owner email.
