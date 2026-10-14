@@ -6,7 +6,7 @@ const pair=(a,b)=>[a,b].sort().join('_');
 const friendId=r=>r.a===uid?r.b:r.a;
 const friendName=r=>r.a===uid?r.bName:r.aName;
 const panel=(id,html)=>$(id).innerHTML=html||'<p class="subtle">Nothing here yet.</p>';
-const errorText=e=>e?.code==='permission-denied'?'Friend access is blocked. Ask the owner to publish the version 1.5.2 Firestore rules.':'Could not complete this request. Please try again.';
+const errorText=e=>e?.code==='permission-denied'?'Friend access is blocked. Ask the owner to publish the version 1.5.3 Firestore rules.':'Could not complete this request. Please try again.';
 async function refresh(){
  const f=api.firestore,c=f.collection(api.db,'friendships');
  try{

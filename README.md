@@ -86,6 +86,10 @@ Live countdown to the owner-specified December 18, 2026 at 20:00 Israel time. Da
 My lists (lists.html): named swipe builder, right to add, left to pass, up to defer. Deferred cards return after undecided cards. Up to five device-local cookie lists and one resumable draft. Saved lists use global release-date order; the home catalogue groups them by original phase while Next to Watch uses release order. Unknown dates sort last. Existing watched progress is shared. Full backup includes saved lists. Classifications use existing saved RoadToDoomsday metadata.
 
 
+## Version 1.5.3
+
+Fixed phone access paths: the account menu provides direct Friends and Manage site links; owners are recognized from the protected owner record even when role flags were not set on the profile. Firestore permissions now grant the configured owner full site access independently of profile flags.
+
 ## Version 1.5.2
 
 The account avatar opens a menu with Sign out. The embedded management route now switches directly to its dashboard and reports partial loading failures. My friends is a separate in-site page for username requests, pending approval, accepted friends and a movie-night suggestion. The new Firestore rules in `backend/firestore.rules` must be published separately in Firebase Console for friendship actions. No friend count limit applies.

@@ -89,3 +89,10 @@ test('friend requests require approval; progress stays private until accepted',a
  await assertSucceeds(deleteDoc(ref));
  await assertFails(getDoc(doc(d,'friendProgress/manager')));
 });
+test('the configured owner does not depend on profile role flags',async()=>{
+ await env.withSecurityRulesDisabled(async c=>setDoc(doc(c.firestore(),'system/owner'),{uid:'pending'}));
+ const d=db('pending');
+ await assertSucceeds(getDoc(doc(d,'titles/original')));
+ await assertSucceeds(setDoc(doc(d,'titles/owner-added'),{...title('Owner addition','pending'),createdAt:serverTimestamp()}));
+ await env.withSecurityRulesDisabled(async c=>setDoc(doc(c.firestore(),'system/owner'),{uid:'owner'}));
+});

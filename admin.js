@@ -2,7 +2,7 @@ import './access.js';
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let api,account,ownerId,allTitles=[];
 const note=s=>$('#admin-message').textContent=s;
-const authorized=()=>account&&(account.manage||account.Fmanage);
+const authorized=()=>account&&(account.manage||account.Fmanage||api?.isOwner);
 const management=$('#management-view'),main=document.querySelector('main');
 function showManagement(){
   const active=location.hash==='#manage'&&!!authorized();
@@ -22,10 +22,10 @@ async function load(){
   if(!authorized()){showManagement();return}
   $('#admin-content').hidden=false;showManagement();note('Management access is ready.');
   const {db,firestore:f}=api;
-  if(account.Fmanage){
+  if(account.Fmanage||api.isOwner){
     $('#user-section').hidden=false;$('#title-section').hidden=false;
     try{const owner=await f.getDoc(f.doc(db,'system/owner'));ownerId=owner.data()?.uid;}catch{ownerId=null;}
-    $('#management-role').textContent=ownerId===api.auth.currentUser.uid?'Owner': 'Senior manager';
+    $('#management-role').textContent=api.isOwner||ownerId===api.auth.currentUser.uid?'Owner': 'Senior manager';
     const results=await Promise.allSettled([users(),titles(),requests()]);
     if(results.some(r=>r.status==='rejected'))note('Management opened. Some data could not load; check the published Firestore rules and account role.');
   }else $('#management-role').textContent='Manager';

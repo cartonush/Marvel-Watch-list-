@@ -9,7 +9,7 @@ if (firebaseEnabled && firebaseConfig) {
     import('https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js')
   ]);
   const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
-  let current=null,unsub=null,resolveReady;
+  let current=null,unsub=null,resolveReady,ownerUid=null;
   const ready=new Promise(resolve=>resolveReady=resolve);
   const overlay=document.createElement('section');
   overlay.id='access-overlay';
@@ -40,10 +40,11 @@ if (firebaseEnabled && firebaseConfig) {
   }
   function render(message=''){
     const user=auth.currentUser;
-    const approved=!!current&&current.status==='approved'&&current.view&&!!usernameOf(user);
+    const isOwner=!!user&&ownerUid===user.uid;
+    const approved=!!current&&((current.status==='approved'&&current.view)||isOwner)&&!!usernameOf(user);
     document.documentElement.classList.toggle('access-locked',!approved);
     const manageNav=document.getElementById('manage-nav');
-    if(manageNav)manageNav.hidden=!approved||!(current.manage||current.Fmanage);
+    if(manageNav)manageNav.hidden=!approved||!(current.manage||current.Fmanage||isOwner);
     if(approved){
       overlay.hidden=true;
       let button=document.getElementById('profile-button');
@@ -52,7 +53,7 @@ if (firebaseEnabled && firebaseConfig) {
       button.setAttribute('aria-label','Account menu');button.setAttribute('aria-expanded','false');
       let actions=document.getElementById('account-actions');
       if(!actions){actions=document.createElement('div');actions.id='account-actions';actions.className='account-menu';actions.hidden=true;document.body.append(actions)}
-      actions.innerHTML=`<strong>@${esc(current.username||usernameOf(user))}</strong>${document.getElementById('modal')?'<button type="button" data-open-profile>My watch profile</button>':''}${(current.manage||current.Fmanage)&&!manageNav?'<a href="index.html#manage">Manage site</a>':''}<button type="button" id="sign-out">Sign out</button>`;
+      actions.innerHTML=`<strong>@${esc(current.username||usernameOf(user))}</strong>${document.getElementById('modal')?'<button type="button" data-open-profile>My watch profile</button>':''}<a href="friends.html">My friends</a>${(current.manage||current.Fmanage||isOwner)?'<a href="index.html#manage">Manage site</a>':''}<button type="button" id="sign-out">Sign out</button>`;
       button.onclick=()=>{actions.hidden=!actions.hidden;button.setAttribute('aria-expanded',String(!actions.hidden));if(!actions.hidden){const r=button.getBoundingClientRect();actions.style.top=`${r.bottom+8}px`;actions.style.right=`${Math.max(10,innerWidth-r.right)}px`}};
       actions.querySelector('#sign-out').onclick=()=>signOut(auth);
       actions.querySelector('[data-open-profile]')?.addEventListener('click',()=>{actions.hidden=true;button.setAttribute('aria-expanded','false');document.dispatchEvent(new Event('marvel-open-profile'))});
@@ -105,6 +106,8 @@ if (firebaseEnabled && firebaseConfig) {
     try{
       await ensurePendingProfile(user);
       if(auth.currentUser?.uid!==user.uid)return;
+      try{const owner=await getDoc(doc(db,'system/owner'));ownerUid=owner.exists()?owner.data()?.uid:null}catch{ownerUid=null}
+      if(auth.currentUser?.uid!==user.uid)return;
       unsub=(await import('https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js')).onSnapshot(doc(db,'users',user.uid),
         snap=>{current=snap.exists()?snap.data():null;render();},error=>{current=null;render(friendlyError(error))});
     }catch(error){render(friendlyError(error))}
@@ -135,7 +138,7 @@ if (firebaseEnabled && firebaseConfig) {
     }
     return base;
   }
-  window.MarvelAccess={ready,catalog,enrich,get account(){return current},auth,db,
+  window.MarvelAccess={ready,catalog,enrich,get account(){return current},get isOwner(){return !!auth.currentUser&&ownerUid===auth.currentUser.uid},auth,db,
     firestore:{doc,getDoc,getDocs,collection,addDoc,updateDoc,deleteDoc,query,where,runTransaction,serverTimestamp,setDoc}};
   document.addEventListener('click',e=>{const menu=document.getElementById('account-actions'),button=document.getElementById('profile-button');if(menu&&!menu.hidden&&!menu.contains(e.target)&&!button?.contains(e.target)){menu.hidden=true;button?.setAttribute('aria-expanded','false')}});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){const menu=document.getElementById('account-actions');if(menu)menu.hidden=true;document.getElementById('profile-button')?.setAttribute('aria-expanded','false')}});

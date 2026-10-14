@@ -11,9 +11,9 @@ service cloud.firestore {
         && request.auth.uid == get(/databases/$(database)/documents/system/owner).data.uid;
     }
     function approved() {
-      return usernameAccount()
-        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'approved'
-        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.view == true;
+      return usernameAccount() && (owner()
+        || (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'approved'
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.view == true));
     }
     function manage() {
       return approved() && (owner()
