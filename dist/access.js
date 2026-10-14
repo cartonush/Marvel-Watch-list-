@@ -2,8 +2,8 @@ import {firebaseConfig,firebaseEnabled} from './firebase-config.js';
 
 if (firebaseEnabled && firebaseConfig) {
   const [{initializeApp},{getAuth,onAuthStateChanged,createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,signOut},{getFirestore,doc,setDoc,getDoc,getDocs,collection,addDoc,updateDoc,deleteDoc,
-    query,where,runTransaction,serverTimestamp}] = await Promise.all([
+    signInWithEmailAndPassword,signOut},{getFirestore,doc,setDoc,getDoc,getDocFromServer,getDocs,collection,addDoc,updateDoc,deleteDoc,
+    query,where,runTransaction,serverTimestamp,onSnapshot}] = await Promise.all([
     import('https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js'),
     import('https://www.gstatic.com/firebasejs/13.0.0/firebase-auth.js'),
     import('https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js')
@@ -142,7 +142,7 @@ if (firebaseEnabled && firebaseConfig) {
     return base;
   }
   window.MarvelAccess={ready,catalog,enrich,get account(){return current},get isOwner(){return !!auth.currentUser&&ownerUid===auth.currentUser.uid},auth,db,
-    firestore:{doc,getDoc,getDocs,collection,addDoc,updateDoc,deleteDoc,query,where,runTransaction,serverTimestamp,setDoc}};
+    firestore:{doc,getDoc,getDocFromServer,getDocs,collection,addDoc,updateDoc,deleteDoc,query,where,runTransaction,serverTimestamp,onSnapshot,setDoc}};
   document.addEventListener('click',e=>{const menu=document.getElementById('account-actions'),button=document.getElementById('profile-button');if(menu&&!menu.hidden&&!menu.contains(e.target)&&!button?.contains(e.target)){menu.hidden=true;button?.setAttribute('aria-expanded','false')}});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){const menu=document.getElementById('account-actions');if(menu)menu.hidden=true;document.getElementById('profile-button')?.setAttribute('aria-expanded','false')}});
 }

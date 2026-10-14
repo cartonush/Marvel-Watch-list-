@@ -77,6 +77,21 @@ test('search engines are readable to viewers and only managers can extend them',
  await assertFails(deleteDoc(doc(db('owner'),'searchEngines/direct')));
  await assertFails(getDoc(doc(db('viewer'),'searchRateLimits/viewer')));
 });
+test('a watchlist belongs only to its approved account',async()=>{
+ const own=doc(db('viewer'),'userWatch/viewer');
+ await assertFails(getDoc(doc(db('pending'),'userWatch/pending')));
+ await assertFails(setDoc(doc(db('pending'),'userWatch/pending'),{v:1,updatedAt:serverTimestamp()}));
+ await assertFails(setDoc(doc(db('manager'),'userWatch/viewer'),{v:1,updatedAt:serverTimestamp()}));
+ await assertSucceeds(setDoc(own,{v:1,progress:{m2:2},favorites:{m2:true},
+   skipped:{},lists:{0:{name:'My list',ids:['m2']}},settings:{theme:'dark'},activeList:0,
+   name:'My journey',updatedAt:serverTimestamp()}));
+ await assertSucceeds(getDoc(own));
+ await assertFails(getDoc(doc(db('owner'),'userWatch/viewer')));
+ await assertFails(getDocs(collection(db('viewer'),'userWatch')));
+ await assertFails(updateDoc(own,{manage:true,updatedAt:serverTimestamp()}));
+ await assertSucceeds(setDoc(own,{progress:{m3:1},updatedAt:serverTimestamp()},{merge:true}));
+ await assertFails(deleteDoc(own));
+});
 test('only approved accounts can register their own discoverable username',async()=>{
  const own={uid:'viewer',username:'viewer',createdAt:serverTimestamp()};
  await assertFails(setDoc(doc(db('viewer'),'handles/other'),own));

@@ -112,6 +112,24 @@ service cloud.firestore {
         && request.resource.data.updatedAt == request.time;
       allow delete: if approved() && request.auth.uid == uid;
     }
+    function watchShape(d) {
+      return d.keys().hasOnly(['v','progress','favorites','skipped','lists','settings','activeList','name','updatedAt'])
+        && d.keys().hasAll(['v','updatedAt']) && d.v == 1 && d.updatedAt == request.time
+        && (!d.keys().hasAny(['progress']) || (d.progress is map && d.progress.size() <= 600))
+        && (!d.keys().hasAny(['favorites']) || (d.favorites is map && d.favorites.size() <= 600))
+        && (!d.keys().hasAny(['skipped']) || (d.skipped is map && d.skipped.size() <= 600))
+        && (!d.keys().hasAny(['lists']) || (d.lists is map && d.lists.size() <= 5))
+        && (!d.keys().hasAny(['settings']) || (d.settings is map && d.settings.size() <= 12))
+        && (!d.keys().hasAny(['activeList']) || d.activeList == null
+          || (d.activeList is int && d.activeList >= 0 && d.activeList < 5))
+        && (!d.keys().hasAny(['name']) || (d.name is string && d.name.size() <= 32));
+    }
+    match /userWatch/{uid} {
+      allow get: if approved() && request.auth.uid == uid;
+      allow list, delete: if false;
+      allow create, update: if approved() && request.auth.uid == uid
+        && watchShape(request.resource.data);
+    }
     function titleShape(d) {
       return d.keys().hasAll(['title','date','seconds','kind','episodes','createdBy','createdAt','archived','group','collections','url','poster','priority','reason'])
         && d.keys().hasOnly(['title','date','seconds','kind','episodes','createdBy','createdAt','archived','group','collections','url','poster','priority','reason','imdb'])

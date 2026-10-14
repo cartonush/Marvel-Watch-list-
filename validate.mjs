@@ -7,10 +7,10 @@ function node(s){if(!nodes.has(s))nodes.set(s,{innerHTML:'',textContent:'',value
 const cookieJar=new Map(),handlers={};let blockedWrites=0;
 const doc={documentElement:{dataset:{},classList:{toggle(){},add(){},remove(){}}},querySelector:node,querySelectorAll:()=>[],addEventListener:(n,f)=>handlers[n]=f,createElement:()=>({click(){}})};
 Object.defineProperty(doc,'cookie',{get:()=>[...cookieJar].map(([k,v])=>k+'='+v).join('; '),set:s=>{if(blockedWrites>0){blockedWrites--;return}const[k,v]=s.split(';')[0].split('=');if(s.includes('Max-Age=0'))cookieJar.delete(k);else cookieJar.set(k,v)}});
-const context=vm.createContext({document:doc,location:{protocol:'https:',origin:'https://example.com',pathname:'/'},crypto:{randomUUID:()=> 'test-profile'},TextEncoder,TextDecoder,btoa,atob,console,setTimeout:()=>0,clearTimeout(){},navigator:{},URL,URLSearchParams,Blob,history:{replaceState(){}},dataFixture:data});
+const context=vm.createContext({document:doc,location:{protocol:'https:',origin:'https://example.com',pathname:'/'},crypto:{randomUUID:()=> 'test-profile'},TextEncoder,TextDecoder,btoa,atob,console,setTimeout:()=>0,clearTimeout(){},addEventListener(){},navigator:{},URL,URLSearchParams,Blob,history:{replaceState(){}},dataFixture:data});
 vm.runInContext(fs.readFileSync('dist/cookie-store.js','utf8'),context);
 vm.runInContext(fs.readFileSync('dist/lists-store.js','utf8'),context);
-const source=fs.readFileSync('dist/app.js','utf8').replace(/^import '.\/access\.js(?:\?[^']*)?';\n/,'').replace(/init\(\);\s*$/,'');
+const source=fs.readFileSync('dist/app.js','utf8').replace(/^import '[^']+';\n/gm,'').replace(/init\(\);\s*$/,'');
 vm.runInContext(source,context);
 const run=s=>vm.runInContext(s,context);
 run('data=dataFixture;items=data.items;state=fresh();');
@@ -204,7 +204,7 @@ run('setProgress(0,1)');assert.equal(run('isSkipped(0)'),false);
 assert.equal(run('metrics(state.p,true).count'),1);
 assert.equal(run('normalizeProfile({...fresh(),s:undefined}).s.length'),0);
 assert.throws(()=>run('parseBackup(JSON.stringify({...fullBackup(),profile:{...portableProfile(state),skipped:["unknown"]}}))'));
-assert.match(fs.readFileSync('dist/index.html','utf8'),/Version 1\.5/);
+assert.match(fs.readFileSync('dist/index.html','utf8'),/Version 1\.6/);
 console.log('Skip list, queue, cookie, backup, undo, watched transition, legacy profile and version passed.');
 
 run('state=fresh();prefs.route="all";state.p=items.map(x=>x.episodes);state.p[0]=0;items[0].seconds=90000');

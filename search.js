@@ -1,4 +1,4 @@
-import './access.js?v=1.5.15';
+import './access.js?v=1.6';
 
 const $=selector=>document.querySelector(selector);
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));

@@ -1,4 +1,4 @@
-import './access.js?v=1.5.15';
+import './cloud-sync.js?v=1.6';
 const L=MarvelLists,$=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function posterSrc(value){if(typeof value!=='string')return '';if(/^assets\/[a-zA-Z0-9_-]+\.webp$/.test(value))return value;if(/^imdb:tt\d{7,10}$/.test(value))return `https://images.metahub.space/poster/medium/${value.slice(5)}/img`;try{const u=new URL(value);if(u.protocol==='https:'&&u.hostname==='m.media-amazon.com'&&u.pathname.startsWith('/images/')&&!u.username&&!u.password)return u.href}catch{}return ''}
 let items=[],draft=null,history=[],drag=null;
@@ -19,4 +19,6 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)r
 document.addEventListener('keydown',e=>{if(!draft||!['ArrowLeft','ArrowRight','ArrowUp'].includes(e.key)||['INPUT','TEXTAREA'].includes(e.target.tagName))return;e.preventDefault();choose(e.key==='ArrowRight'?'y':e.key==='ArrowLeft'?'n':'l');});
 (async()=>{try{if(globalThis.MarvelAccess)await MarvelAccess.ready;const res=await fetch('data.json',{cache:'no-cache'});if(!res.ok)throw Error('Could not load titles');let catalog=await res.json();if(globalThis.MarvelAccess)catalog=await MarvelAccess.enrich(catalog);items=catalog.items;globalThis.MarvelRetiredIds=new Set(catalog.retiredIds||[]);const prefs=L.read('marvel_settings_v1'); // Settings use URL-safe base64; theme is also read below.
 try{const s=document.cookie.split('; ').find(x=>x.startsWith('marvel_settings_v1='));if(s){const raw=s.slice(s.indexOf('=')+1).replace(/-/g,'+').replace(/_/g,'/'),p=JSON.parse(atob(raw));document.documentElement.dataset.theme=p.theme==='system'?(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'):p.theme;document.documentElement.dataset.accent=p.accent;}}catch{}
-showLibrary();$('#start-list').disabled=false;}catch(e){notice(e.message+' — reload to try again.')}})();
+await MarvelSync.start(catalog);showLibrary();$('#start-list').disabled=false;}catch(e){notice(e.message+' — reload to try again.')}})();
+globalThis.addEventListener('marvel-cloud-update',()=>{if(items.length&&!draft)showLibrary()});
+globalThis.addEventListener('marvel-sync-status',event=>{const label=$('#cloud-sync-status');if(label){label.textContent=event.detail.message;label.dataset.state=event.detail.kind}});
