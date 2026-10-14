@@ -1,25 +1,41 @@
 import './access.js';
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let api,account,ownerId,allTitles=[];
+let api,account,ownerId,allTitles=[],loading=false,loadedUid=null;
 const note=s=>$('#admin-message').textContent=s;
-const authorized=()=>account&&(account.manage||account.Fmanage||api?.isOwner);
+const authorized=()=>!!account&&(account.manage===true||account.Fmanage===true||!!api?.isOwner);
 const management=$('#management-view'),main=document.querySelector('main');
 function showManagement(){
-  const active=location.hash==='#manage'&&!!authorized();
+  // Always render the route shell for a direct link; privileged data stays hidden without access.
+  const active=location.hash==='#manage';
   main.classList.toggle('management-active',active);
   management.hidden=!active;$('#manage-nav').classList.toggle('active',active);
+  if(active&&!authorized()){
+    $('#admin-content').hidden=true;
+    note(api?.account?'This account does not have management access.':'Checking your management access…');
+  }
   if(active)window.scrollTo(0,0);
 }
-$('#manage-nav').onclick=()=>{if(!authorized()){note('Your account does not have management access.');return}history.pushState(null,'','#manage');showManagement();if($('#menu').getAttribute('aria-expanded')==='true')$('#menu').click()};
+$('#manage-nav').addEventListener('click',e=>{
+  e.preventDefault();
+  if(location.hash!=='#manage')history.pushState(null,'','#manage');
+  showManagement();
+  if($('#menu').getAttribute('aria-expanded')==='true')$('#menu').click();
+  if(authorized())load().catch(()=>note('Could not load management data. Check Firebase configuration and access.'));
+});
 $('#leave-management').onclick=()=>{history.pushState(null,'',location.pathname+location.search);showManagement()};
 window.addEventListener('hashchange',showManagement);window.addEventListener('popstate',showManagement);
 document.querySelector('#sidebar').addEventListener('click',e=>{if(e.target.closest('#manage-nav'))return;if(e.target.closest('[data-group],[data-status],[data-settings],#friends-nav')){history.replaceState(null,'',location.pathname+location.search);showManagement()}},true);
-window.addEventListener('marvel-access-change',()=>{const was=!!authorized();account=api?.account||null;if(!authorized()){$('#admin-content').hidden=true;showManagement()}else if(!was)load().catch(()=>note('Could not load management data.'))});
+window.addEventListener('marvel-access-change',()=>{api=window.MarvelAccess||api;const was=!!authorized();account=api?.account||null;if(!authorized()){$('#admin-content').hidden=true;showManagement()}else if(!was||location.hash==='#manage')load().catch(()=>note('Could not load management data.'))});
 async function load(){
+  if(loading)return;
+  loading=true;
+  try{
   api=window.MarvelAccess;
   if(!api){note('Account management becomes available after Firebase is configured.');return}
   await api.ready;account=api.account;
   if(!authorized()){showManagement();return}
+  const uid=api.auth.currentUser?.uid;
+  if(uid&&loadedUid===uid){$('#admin-content').hidden=false;showManagement();return}
   $('#admin-content').hidden=false;showManagement();note('Management access is ready.');
   const {db,firestore:f}=api;
   if(account.Fmanage||api.isOwner){
@@ -30,6 +46,8 @@ async function load(){
     if(results.some(r=>r.status==='rejected'))note('Management opened. Some data could not load; check the published Firestore rules and account role.');
   }else $('#management-role').textContent='Manager';
   try{const settings=await f.getDoc(f.doc(db,'settings/basic'));if(settings.exists()){$('#basic-settings').elements.announcement.value=settings.data().announcement||'';$('#basic-settings').elements.defaultTheme.value=settings.data().defaultTheme||'dark';}}catch{note('Management opened, but basic settings could not load.');}
+  loadedUid=uid||null;
+  }finally{loading=false}
 }
 async function users(){
   const {db,firestore:f}=api,docs=await f.getDocs(f.collection(db,'users'));

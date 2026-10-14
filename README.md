@@ -68,7 +68,7 @@ Nine requested titles now reference distinct local poster files. Six newly sourc
 
 ## Version 1.0.0
 
-The current displayed version is 1.5. Bump it only when the owner explicitly asks to advance the version; the next version is 1.6, then 1.7, and so on. Publish the requested version with its GitHub update. Routine edits do not automatically advance the displayed version. Skip is a personal saved list separate from watched progress. Skipped titles leave Next to watch, stay uncompleted in statistics, and appear in Skipped Items across routes. Marking a skipped title watched clears its skipped flag. Undo, reset and full backup include the skipped list; old cookies/backups without it remain supported.
+The current displayed version is 1.5.4. Advance the patch version when a change is published to GitHub. Skip is a personal saved list separate from watched progress. Skipped titles leave Next to watch, stay uncompleted in statistics, and appear in Skipped Items across routes. Marking a skipped title watched clears its skipped flag. Undo, reset and full backup include the skipped list; old cookies/backups without it remain supported.
 
 
 ## Version 1.2
@@ -85,6 +85,10 @@ Live countdown to the owner-specified December 18, 2026 at 20:00 Israel time. Da
 
 My lists (lists.html): named swipe builder, right to add, left to pass, up to defer. Deferred cards return after undecided cards. Up to five device-local cookie lists and one resumable draft. Saved lists use global release-date order; the home catalogue groups them by original phase while Next to Watch uses release order. Unknown dates sort last. Existing watched progress is shared. Full backup includes saved lists. Classifications use existing saved RoadToDoomsday metadata.
 
+
+## Version 1.5.4
+
+Reduced perceived loading delay on the Friends page: the access overlay now shows a branded progress state, request lists render without waiting for per-friend progress reads, and catalog/progress loads continue in the background. Manage site now uses a real in-app link and always opens a safe dashboard shell; account-only data remains hidden unless the current user has a management role. Added a shared load guard to prevent duplicate management reads. Updated mobile cache keys and visible version.
 
 ## Version 1.5.3
 

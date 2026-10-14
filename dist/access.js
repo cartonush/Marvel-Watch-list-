@@ -14,6 +14,8 @@ if (firebaseEnabled && firebaseConfig) {
   const overlay=document.createElement('section');
   overlay.id='access-overlay';
   overlay.setAttribute('aria-live','polite');
+  // Keep the protected screen from appearing as a blank black page while Firebase starts.
+  overlay.innerHTML='<div class="access-loading" role="status"><span class="access-spinner" aria-hidden="true"></span><strong>Opening Marvel List</strong><span>Checking your secure sign-in…</span></div>';
   document.body.append(overlay);
   document.documentElement.classList.add('access-locked');
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
