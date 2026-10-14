@@ -7,6 +7,11 @@ const friendId=r=>r.a===uid?r.b:r.a;
 const friendName=r=>r.a===uid?r.bName:r.aName;
 const panel=(id,html)=>$(id).innerHTML=html||'<p class="subtle">Nothing here yet.</p>';
 const errorText=e=>e?.code==='permission-denied'?'Friend access is blocked. Ask the owner to publish the version 1.5.3 Firestore rules.':'Could not complete this request. Please try again.';
+function loadProgress(){
+ if(!catalog.length)return;
+ const accepted=rows.filter(r=>r.status==='accepted');
+ void Promise.all(accepted.map(showProgress));
+}
 async function refresh(){
  const f=api.firestore,c=f.collection(api.db,'friendships');
  try{
@@ -16,7 +21,7 @@ async function refresh(){
   panel('#pending-requests',incoming.map(r=>`<div class="friend-entry"><div><strong>@${esc(friendName(r))}</strong><small>Wants to compare journeys</small></div><div class="list-buttons"><button class="primary" data-accept="${esc(r.id)}">Accept</button><button class="secondary" data-remove="${esc(r.id)}">Decline</button></div></div>`).join(''));
   panel('#sent-requests',outgoing.map(r=>`<div class="friend-entry"><div><strong>@${esc(friendName(r))}</strong><small>Waiting for approval</small></div><button class="secondary" data-remove="${esc(r.id)}">Cancel</button></div>`).join(''));
   panel('#accepted-friends',accepted.map(r=>`<div class="friend-entry"><div><strong>@${esc(friendName(r))}</strong><small id="progress-${esc(r.id)}">Loading progress…</small></div><button class="text-button" data-remove="${esc(r.id)}">Remove friend</button></div>`).join(''));
-  await Promise.all(accepted.map(showProgress));
+  loadProgress();
  }catch(e){message(errorText(e));for(const id of ['#pending-requests','#sent-requests','#accepted-friends'])panel(id,'<p class="subtle">Could not load friends.</p>')}
 }
 async function showProgress(r){
@@ -59,4 +64,13 @@ document.addEventListener('click',async e=>{
  try{const f=api.firestore,ref=f.doc(api.db,'friendships',id);if(button.dataset.accept){if(row.requestedBy===uid)throw Error('Only the recipient can accept.');await f.updateDoc(ref,{status:'accepted',updatedAt:f.serverTimestamp()});message(`You and @${friendName(row)} are now friends.`)}else{await f.deleteDoc(ref);message('Request or friendship removed.')}await refresh()}catch(err){message(errorText(err));button.disabled=false}
 });
 $('#refresh-friends').onclick=refresh;
-try{api=globalThis.MarvelAccess;await api.ready;uid=api.auth.currentUser.uid;const response=await fetch('data.json',{cache:'no-cache'});if(response.ok)catalog=(await api.enrich(await response.json())).items;await refresh()}catch(e){message('Could not load friends. Please reload the page.')}
+try{
+ api=globalThis.MarvelAccess;
+ // Load the local catalog independently so the friends list can render as soon as Firestore responds.
+ const baseCatalog=fetch('data.json',{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error('catalog');return r.json()});
+ await api.ready;uid=api.auth.currentUser.uid;
+ const enrichedCatalog=baseCatalog.then(data=>api.enrich(data)).then(data=>data.items).catch(()=>[]);
+ await refresh();
+ catalog=(await baseCatalog).items;loadProgress();
+ enrichedCatalog.then(merged=>{if(merged.length){catalog=merged;loadProgress()}});
+}catch(e){message('Could not load friends. Please reload the page.')}

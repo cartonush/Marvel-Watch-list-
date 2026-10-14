@@ -68,7 +68,7 @@ Nine requested titles now reference distinct local poster files. Six newly sourc
 
 ## Version 1.0.0
 
-The current displayed version is 1.5.5. Advance the patch version when a change is published to GitHub. Skip is a personal saved list separate from watched progress. Skipped titles leave Next to watch, stay uncompleted in statistics, and appear in Skipped Items across routes. Marking a skipped title watched clears its skipped flag. Undo, reset and full backup include the skipped list; old cookies/backups without it remain supported.
+The current displayed version is 1.5.6. Advance the patch version when a change is published to GitHub. Skip is a personal saved list separate from watched progress. Skipped titles leave Next to watch, stay uncompleted in statistics, and appear in Skipped Items across routes. Marking a skipped title watched clears its skipped flag. Undo, reset and full backup include the skipped list; old cookies/backups without it remain supported.
 
 
 ## Version 1.2
@@ -85,6 +85,10 @@ Live countdown to the owner-specified December 18, 2026 at 20:00 Israel time. Da
 
 My lists (lists.html): named swipe builder, right to add, left to pass, up to defer. Deferred cards return after undecided cards. Up to five device-local cookie lists and one resumable draft. Saved lists use global release-date order; the home catalogue groups them by original phase while Next to Watch uses release order. Unknown dates sort last. Existing watched progress is shared. Full backup includes saved lists. Classifications use existing saved RoadToDoomsday metadata.
 
+
+## Version 1.5.6
+
+Manage site now opens as a responsive in-app dialog, matching the My Lists flow. The account menu and mobile navigation open the same modal; users without a management role never see the entry. Existing `admin.html` links return to the app and open that dialog for authorized users.
 
 ## Version 1.5.5
 
@@ -113,4 +117,4 @@ All MCU (based on Wikipedia): 118 entries. All Marvel: 344 entries, 234 newly ad
 
 Run `node validate.mjs` for the legacy 1.5.1 regression fixture, then `node test-catalog.mjs` for expanded catalog/storage migration. Browser QA is unavailable in this session. `backend/` contains the active username-only Firestore rules and owner bootstrap instructions. Authentication and authorization code is present; publish the matching rules and initialize the owner UID before inviting users. The static catalog remains public at its URL.
 
-Management opens at `admin.html` for approved Manager, Senior manager (Fmanage), or Owner accounts. Firestore rules enforce every management operation; the route and menu visibility are UI gates only. One-time owner setup remains a privileged Firebase Console/Admin SDK action.
+Management opens in an in-app dialog for approved Manager, Senior manager (Fmanage), or Owner accounts. Firestore rules enforce every management operation; the route and menu visibility are UI gates only. One-time owner setup remains a privileged Firebase Console/Admin SDK action.
