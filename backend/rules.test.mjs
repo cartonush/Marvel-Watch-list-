@@ -1,5 +1,6 @@
 // Requires a running Firestore emulator and @firebase/rules-unit-testing + firebase.
 import {readFileSync} from 'node:fs';
+import assert from 'node:assert/strict';
 import {test, before, after} from 'node:test';
 import {initializeTestEnvironment, assertFails, assertSucceeds} from '@firebase/rules-unit-testing';
 import {doc, setDoc, getDoc, getDocs, collection, query, where, updateDoc, deleteDoc, serverTimestamp, writeBatch} from 'firebase/firestore';
@@ -51,6 +52,7 @@ test('full manager can approve regular users but cannot grant roles or change ow
 test('owner can grant a role but cannot replace owner through browser',async()=>{
  await assertSucceeds(updateDoc(doc(db('owner'),'users/viewer'),{manage:true,updatedAt:serverTimestamp()}));
  await assertFails(updateDoc(doc(db('owner'),'system/owner'),{uid:'viewer'}));
+ await assertSucceeds(updateDoc(doc(db('owner'),'users/viewer'),{manage:false,updatedAt:serverTimestamp()}));
 });
 test('archival approval requires owner and an archived title',async()=>{
  await assertSucceeds(setDoc(doc(db('admin'),'deletionRequests/request'),{titleId:'original',reason:'Duplicate',requestedBy:'admin',createdAt:serverTimestamp(),status:'pending'}));
@@ -90,6 +92,9 @@ test('a watchlist belongs only to its approved account',async()=>{
  await assertFails(getDocs(collection(db('viewer'),'userWatch')));
  await assertFails(updateDoc(own,{manage:true,updatedAt:serverTimestamp()}));
  await assertSucceeds(setDoc(own,{progress:{m3:1},updatedAt:serverTimestamp()},{merge:true}));
+ const combined=(await getDoc(own)).data();
+ assert.equal(combined.progress.m2,2);
+ assert.equal(combined.progress.m3,1);
  await assertFails(deleteDoc(own));
 });
 test('only approved accounts can register their own discoverable username',async()=>{
