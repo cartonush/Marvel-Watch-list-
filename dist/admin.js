@@ -12,16 +12,26 @@ function openManagement(){
   if(!adminModal.open)adminModal.showModal();
   if(authorized())load().catch(()=>note('Could not load management data.'));
 }
-function closeManagement(){if(adminModal.open)adminModal.close();}
+function exitManagement(){if(adminModal.open)adminModal.close();}
+function closeManagement(){
+  if(!$('#admin-dashboard').hidden&&adminModal.open){exitManagement();return}
+  if(adminModal.open&&authorized())showDashboard();
+  else exitManagement();
+}
 $('#manage-nav')?.addEventListener('click',openManagement);
 document.addEventListener('marvel-open-management',openManagement);
 $('#leave-management').addEventListener('click',closeManagement);
 $('#close-admin-modal').addEventListener('click',closeManagement);
 adminModal.addEventListener('click',e=>{if(e.target===adminModal)closeManagement()});
+adminModal.addEventListener('cancel',e=>{
+  if($('#admin-dashboard').hidden&&authorized()){e.preventDefault();showDashboard();}
+});
 adminModal.addEventListener('close',()=>{management.hidden=true});
 function showDashboard(){
   $('#admin-dashboard').hidden=false;
   document.querySelectorAll('[data-admin-screen]').forEach(el=>{el.hidden=true});
+  $('#leave-management').textContent='← Back to watchlist';
+  $('#close-admin-modal').setAttribute('aria-label','Close management');
   if(adminModal.open)adminModal.scrollTop=0;
 }
 async function openPanel(name){
@@ -31,6 +41,8 @@ async function openPanel(name){
   if(!panel)return;
   $('#admin-dashboard').hidden=true;
   document.querySelectorAll('[data-admin-screen]').forEach(el=>{el.hidden=el!==panel});
+  $('#leave-management').textContent='← Management dashboard';
+  $('#close-admin-modal').setAttribute('aria-label','Back to management dashboard');
   adminModal.scrollTop=0;
   if(loadedPanels.has(name))return;
   const output=panel.querySelector('[data-admin-loading]');
@@ -58,7 +70,7 @@ async function openPanel(name){
 document.querySelectorAll('[data-admin-panel]').forEach(button=>button.addEventListener('click',()=>void openPanel(button.dataset.adminPanel)));
 document.querySelectorAll('[data-admin-back]').forEach(button=>button.addEventListener('click',showDashboard));
 let openFromLink=new URLSearchParams(location.search).get('manage')==='1';
-window.addEventListener('marvel-access-change',()=>{api=window.MarvelAccess||api;const was=!!authorized();account=api?.account||null;if(!authorized()){$('#admin-content').hidden=true;if(adminModal.open)closeManagement()}else if(!was||openFromLink)load().catch(()=>note('Could not load management data.'));if(openFromLink&&authorized()){openFromLink=false;history.replaceState(null,'',location.pathname+location.hash);openManagement()}});
+window.addEventListener('marvel-access-change',()=>{api=window.MarvelAccess||api;const was=!!authorized();account=api?.account||null;if(!authorized()){$('#admin-content').hidden=true;exitManagement()}else if(!was||openFromLink)load().catch(()=>note('Could not load management data.'));if(openFromLink&&authorized()){openFromLink=false;history.replaceState(null,'',location.pathname+location.hash);openManagement()}});
 async function load(){
   if(loading)return;
   loading=true;
