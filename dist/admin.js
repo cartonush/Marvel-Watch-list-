@@ -1,4 +1,4 @@
-import './access.js?v=1.5.7';
+import './access.js?v=1.5.8';
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let api,account,ownerId,allTitles=[],loading=false,loadedUid=null;
 const note=s=>$('#admin-message').textContent=s;

@@ -1,4 +1,4 @@
-import './access.js';
+import './access.js?v=1.5.8';
 const L=MarvelLists,$=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let items=[],draft=null,history=[],drag=null;
 const runtime=s=>s==null?'Unknown runtime':`${Math.floor(s/3600)}h ${String(Math.floor(s%3600/60)).padStart(2,'0')}m ${String(s%60).padStart(2,'0')}s`;

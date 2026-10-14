@@ -1,4 +1,4 @@
-import './access.js';
+import './access.js?v=1.5.8';
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let api,uid,rows=[],catalog=[];
 const message=s=>$('#friend-message').textContent=s;

@@ -10,7 +10,7 @@ Object.defineProperty(doc,'cookie',{get:()=>[...cookieJar].map(([k,v])=>k+'='+v)
 const context=vm.createContext({document:doc,location:{protocol:'https:',origin:'https://example.com',pathname:'/'},crypto:{randomUUID:()=> 'test-profile'},TextEncoder,TextDecoder,btoa,atob,console,setTimeout:()=>0,clearTimeout(){},navigator:{},URL,URLSearchParams,Blob,history:{replaceState(){}},dataFixture:data});
 vm.runInContext(fs.readFileSync('dist/cookie-store.js','utf8'),context);
 vm.runInContext(fs.readFileSync('dist/lists-store.js','utf8'),context);
-const source=fs.readFileSync('dist/app.js','utf8').replace(/^import '.\/access\.js';\n/,'').replace(/init\(\);\s*$/,'');
+const source=fs.readFileSync('dist/app.js','utf8').replace(/^import '.\/access\.js(?:\?[^']*)?';\n/,'').replace(/init\(\);\s*$/,'');
 vm.runInContext(source,context);
 const run=s=>vm.runInContext(s,context);
 run('data=dataFixture;items=data.items;state=fresh();');
