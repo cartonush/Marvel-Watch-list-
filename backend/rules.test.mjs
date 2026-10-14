@@ -66,6 +66,17 @@ test('basic settings cannot carry authorization settings',async()=>{
  await assertFails(setDoc(doc(db('manager'),'settings/basic'),{...base,owner:'manager'}));
  await assertFails(setDoc(doc(db('manager'),'settings/admin'),{registrationOpen:true}));
 });
+test('search engines are readable to viewers and only managers can extend them',async()=>{
+ const base={name:'Direct watch',sites:['f-movies.org','cinehype.sc'],createdBy:'manager',createdAt:serverTimestamp(),updatedBy:'manager',updatedAt:serverTimestamp()};
+ await assertFails(setDoc(doc(db('viewer'),'searchEngines/direct'),{...base,createdBy:'viewer',updatedBy:'viewer'}));
+ await assertSucceeds(setDoc(doc(db('manager'),'searchEngines/direct'),base));
+ await assertSucceeds(getDocs(collection(db('viewer'),'searchEngines')));
+ await assertFails(getDocs(collection(db('pending'),'searchEngines')));
+ await assertSucceeds(updateDoc(doc(db('manager'),'searchEngines/direct'),{sites:['f-movies.org','cinehype.sc','example.com'],updatedAt:serverTimestamp()}));
+ await assertFails(updateDoc(doc(db('manager'),'searchEngines/direct'),{sites:['example.com'],updatedAt:serverTimestamp()}));
+ await assertFails(deleteDoc(doc(db('owner'),'searchEngines/direct')));
+ await assertFails(getDoc(doc(db('viewer'),'searchRateLimits/viewer')));
+});
 test('only approved accounts can register their own discoverable username',async()=>{
  const own={uid:'viewer',username:'viewer',createdAt:serverTimestamp()};
  await assertFails(setDoc(doc(db('viewer'),'handles/other'),own));

@@ -180,6 +180,32 @@ service cloud.firestore {
     match /settings/admin {
       allow read, write: if owner();
     }
+    function engineShape(d) {
+      return d.keys().hasAll(['name','sites','createdBy','createdAt','updatedBy','updatedAt'])
+        && d.keys().hasOnly(['name','sites','createdBy','createdAt','updatedBy','updatedAt'])
+        && d.name is string && d.name.size() >= 2 && d.name.size() <= 40
+        && d.sites is list && d.sites.size() >= 1 && d.sites.size() <= 10
+        && d.createdBy is string && d.createdAt is timestamp
+        && d.updatedBy is string && d.updatedAt == request.time;
+    }
+    match /searchEngines/{id} {
+      allow read: if approved();
+      allow create: if manage() && engineShape(request.resource.data)
+        && (id in ['direct','torrents','subs'] || id.matches('custom-[a-f0-9-]{36}'))
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.updatedBy == request.auth.uid
+        && request.resource.data.createdAt == request.time;
+      allow update: if manage() && engineShape(request.resource.data)
+        && request.resource.data.name == resource.data.name
+        && request.resource.data.createdBy == resource.data.createdBy
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.sites.hasAll(resource.data.sites)
+        && request.resource.data.updatedBy == request.auth.uid;
+      allow delete: if false;
+    }
+    match /searchRateLimits/{uid} {
+      allow read, write: if false;
+    }
     match /{document=**} { allow read, write: if false; }
   }
 }

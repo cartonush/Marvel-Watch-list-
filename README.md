@@ -68,7 +68,7 @@ Nine requested titles now reference distinct local poster files. Six newly sourc
 
 ## Version 1.0.0
 
-The current displayed version is 1.5.13. Advance the patch version when a change is published to GitHub. Skip is a personal saved list separate from watched progress. Skipped titles leave Next to watch, stay uncompleted in statistics, and appear in Skipped Items across routes. Marking a skipped title watched clears its skipped flag. Undo, reset and full backup include the skipped list; old cookies/backups without it remain supported.
+The current displayed version is 1.5.14. Advance the patch version when a change is published to GitHub. Skip is a personal saved list separate from watched progress. Skipped titles leave Next to watch, stay uncompleted in statistics, and appear in Skipped Items across routes. Marking a skipped title watched clears its skipped flag. Undo, reset and full backup include the skipped list; old cookies/backups without it remain supported.
 
 
 ## Version 1.2
@@ -146,3 +146,7 @@ Management opens in an in-app dialog for approved Manager, Senior manager (Fmana
 ## Version 1.5.13
 
 Removed 207 Wikipedia-only titles outside the MCU and Road to Doomsday. The original 110 and 27 additional MCU titles remain. Historical positional progress is migrated to the 137-title catalog by saved index mapping; older ID-keyed backups and personal lists discard retired titles. Add Title displays save errors beside the submit button and reveals a View added title action, which opens the saved title in All Marvel. IMDb URL and working poster preview remain required; publish backend/firestore.rules in Firebase Console for new title creation.
+
+## Version 1.5.14
+
+Added Search sites with Direct watch, Torrents and Subs tabs. Managers can add validated domains and create custom engines from the in-app management dashboard. Search results are filtered to the configured HTTPS domains. Live results require the callable Firebase function and a server-side Brave Search API secret; see backend/README.md for deployment. The frontend reports clearly when the service is not yet active.

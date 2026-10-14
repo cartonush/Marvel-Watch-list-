@@ -1,9 +1,12 @@
-import './access.js?v=1.5.13';
+import './access.js?v=1.5.14';
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function imdbId(value){try{const u=new URL(value.trim());if(u.protocol!=='https:'||!['imdb.com','www.imdb.com','m.imdb.com'].includes(u.hostname))return null;return /^\/title\/(tt\d{7,10})\/?$/.exec(u.pathname)?.[1]||null}catch{return null}}
 function directPoster(value){try{const u=new URL(value.trim());return u.protocol==='https:'&&u.hostname==='m.media-amazon.com'&&u.pathname.startsWith('/images/')&&!u.username&&!u.password?u.href:null}catch{return null}}
 const suggestedPoster=id=>`https://images.metahub.space/poster/medium/${id}/img`;
 let api,account,ownerId,allTitles=[],loading=false,loadedUid=null;
+let searchDefaults=[],searchEngines=[];
+function searchDomain(raw){try{const u=new URL(raw.includes('://')?raw:'https://'+raw);if(u.protocol!=='https:'||u.username||u.password||u.port||u.pathname!=='/'||u.search||u.hash)return null;const host=u.hostname.toLowerCase().replace(/^www\./,'');return /^(?:[a-z0-9-]+\.)+[a-z]{2,}$/.test(host)?host:null}catch{return null}}
+const searchNote=message=>{$('#search-config-message').textContent=message;};
 const loadedPanels=new Set();
 const note=s=>$('#admin-message').textContent=s;
 const authorized=()=>!!account&&(account.manage===true||account.Fmanage===true||!!api?.isOwner);
@@ -56,6 +59,7 @@ async function openPanel(name){
       const settings=await f.getDoc(f.doc(api.db,'settings/basic'));
       if(settings.exists()){$('#basic-settings').elements.announcement.value=settings.data().announcement||'';$('#basic-settings').elements.defaultTheme.value=settings.data().defaultTheme||'dark';}
     }
+    if(name==='search')await loadSearchEngines();
     if(name==='users'){
       if(!ownerId)try{const owner=await f.getDoc(f.doc(api.db,'system/owner'));ownerId=owner.data()?.uid||null;}catch{ownerId=null;}
       await users();
@@ -111,6 +115,44 @@ async function requests(){
   const pending=docs.docs.filter(d=>d.data().status==='pending');
   $('#admin-requests').innerHTML='<h3>Removal requests</h3>'+(pending.length?pending.map(r=>`<div class="admin-row"><div><strong>${esc(allTitles.find(x=>x.id===r.data().titleId)?.title||r.data().titleId)}</strong><small>${esc(r.data().reason)}</small></div>${api.auth.currentUser.uid===ownerId?`<button class="secondary" data-archive="${esc(r.id)}">Approve archival</button><button class="secondary" data-reject="${esc(r.id)}">Reject</button>`:''}</div>`).join(''):'<p class="subtle">No pending requests.</p>');
 }
+async function loadSearchEngines(){
+  if(!searchDefaults.length)searchDefaults=await fetch('search-engines.json',{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error('Could not load defaults');return r.json()});
+  const docs=await api.firestore.getDocs(api.firestore.collection(api.db,'searchEngines'));
+  const engines=new Map(searchDefaults.map(x=>[x.id,x]));
+  for(const row of docs.docs){const d=row.data();if(typeof d.name==='string'&&Array.isArray(d.sites))engines.set(row.id,{id:row.id,name:d.name,sites:d.sites})}
+  searchEngines=[...engines.values()];
+  $('#search-engine-admin').innerHTML=searchEngines.map(x=>`<article class="search-engine-admin-card"><h3>${esc(x.name)}</h3><p class="subtle">${x.sites.map(esc).join(' · ')}</p><form class="add-engine-site" data-engine-id="${esc(x.id)}"><label>Add site domain<input name="site" required maxlength="100" placeholder="example.com" autocapitalize="none" spellcheck="false"></label><button class="secondary">Add site</button></form></article>`).join('');
+}
+$('#search-engine-admin').addEventListener('submit',async e=>{
+  const form=e.target.closest('form[data-engine-id]');if(!form)return;e.preventDefault();if(!authorized())return;
+  const site=searchDomain(form.elements.site.value),engine=searchEngines.find(x=>x.id===form.dataset.engineId),button=form.querySelector('button');
+  if(!site||!engine){searchNote('Enter a domain like example.com, without a path.');return}
+  if(engine.sites.includes(site)){searchNote('This site is already in the engine.');return}
+  if(engine.sites.length>=10){searchNote('Each engine can contain up to 10 sites.');return}
+  button.disabled=true;searchNote('Adding site…');
+  try{
+    const f=api.firestore,ref=f.doc(api.db,'searchEngines',engine.id),uid=api.auth.currentUser.uid;
+    await f.runTransaction(api.db,async tx=>{
+      const snap=await tx.get(ref),data=snap.exists()?snap.data():null,sites=data?.sites||engine.sites;
+      if(sites.includes(site))return;
+      if(sites.length>=10)throw Error('This engine already has 10 sites.');
+      if(data)tx.update(ref,{sites:[...sites,site],updatedBy:uid,updatedAt:f.serverTimestamp()});
+      else tx.set(ref,{name:engine.name,sites:[...sites,site],createdBy:uid,createdAt:f.serverTimestamp(),updatedBy:uid,updatedAt:f.serverTimestamp()});
+    });
+    await loadSearchEngines();searchNote(site+' added to '+engine.name+'.');
+  }catch(error){searchNote(error?.code==='permission-denied'?'Permission denied. Publish the updated Firestore search rules.':'Could not add site. '+(error?.message||'Please try again.'))}
+  finally{if(button.isConnected)button.disabled=false}
+});
+$('#new-search-engine').addEventListener('submit',async e=>{
+  e.preventDefault();if(!authorized())return;const form=e.currentTarget,name=form.elements.name.value.trim(),site=searchDomain(form.elements.site.value),button=form.querySelector('button');
+  if(name.length<2||name.length>40||!site){searchNote('Choose a name and enter a valid site domain.');return}
+  button.disabled=true;searchNote('Creating engine…');
+  try{const f=api.firestore,uid=api.auth.currentUser.uid,id='custom-'+crypto.randomUUID();
+    await f.setDoc(f.doc(api.db,'searchEngines',id),{name,sites:[site],createdBy:uid,createdAt:f.serverTimestamp(),updatedBy:uid,updatedAt:f.serverTimestamp()});
+    form.reset();await loadSearchEngines();searchNote(name+' is ready on the search page.');
+  }catch(error){searchNote(error?.code==='permission-denied'?'Permission denied. Publish the updated Firestore search rules.':'Could not create engine. '+(error?.message||'Please try again.'))}
+  finally{button.disabled=false}
+});
 const addForm=$('#add-title'),posterPreview=$('#add-poster-preview'),posterStatus=$('#add-poster-status');
 const addMessage=$('#add-title-message'),viewAdded=$('#view-added-title');
 function addNote(message,error=false){addMessage.textContent=message;addMessage.dataset.error=error?'true':'false';note(message);}
