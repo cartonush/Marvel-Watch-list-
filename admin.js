@@ -1,11 +1,13 @@
 import './access.js?v=1.5.8';
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let api,account,ownerId,allTitles=[],loading=false,loadedUid=null;
+const loadedPanels=new Set();
 const note=s=>$('#admin-message').textContent=s;
 const authorized=()=>!!account&&(account.manage===true||account.Fmanage===true||!!api?.isOwner);
 const management=$('#management-view'),adminModal=$('#admin-modal');
 function openManagement(){
   management.hidden=false;
+  showDashboard();
   if(!authorized()){$('#admin-content').hidden=true;note(api?.account?'This account does not have management access.':'Checking your management access…');}
   if(!adminModal.open)adminModal.showModal();
   if(authorized())load().catch(()=>note('Could not load management data.'));
@@ -17,6 +19,44 @@ $('#leave-management').addEventListener('click',closeManagement);
 $('#close-admin-modal').addEventListener('click',closeManagement);
 adminModal.addEventListener('click',e=>{if(e.target===adminModal)closeManagement()});
 adminModal.addEventListener('close',()=>{management.hidden=true});
+function showDashboard(){
+  $('#admin-dashboard').hidden=false;
+  document.querySelectorAll('[data-admin-screen]').forEach(el=>{el.hidden=true});
+  if(adminModal.open)adminModal.scrollTop=0;
+}
+async function openPanel(name){
+  if(!authorized())return;
+  if(['users','titles','requests'].includes(name)&&!account.Fmanage&&!api.isOwner)return;
+  const panel=document.querySelector(`[data-admin-screen="${name}"]`);
+  if(!panel)return;
+  $('#admin-dashboard').hidden=true;
+  document.querySelectorAll('[data-admin-screen]').forEach(el=>{el.hidden=el!==panel});
+  adminModal.scrollTop=0;
+  if(loadedPanels.has(name))return;
+  const output=panel.querySelector('[data-admin-loading]');
+  if(output)output.textContent='Loading…';
+  try{
+    const f=api.firestore;
+    if(name==='settings'){
+      const settings=await f.getDoc(f.doc(api.db,'settings/basic'));
+      if(settings.exists()){$('#basic-settings').elements.announcement.value=settings.data().announcement||'';$('#basic-settings').elements.defaultTheme.value=settings.data().defaultTheme||'dark';}
+    }
+    if(name==='users'){
+      if(!ownerId)try{const owner=await f.getDoc(f.doc(api.db,'system/owner'));ownerId=owner.data()?.uid||null;}catch{ownerId=null;}
+      await users();
+    }
+    if(name==='titles')await titles();
+    if(name==='requests'){
+      if(!ownerId)try{const owner=await f.getDoc(f.doc(api.db,'system/owner'));ownerId=owner.data()?.uid||null;}catch{ownerId=null;}
+      if(!allTitles.length)await titles();
+      await requests();
+    }
+    loadedPanels.add(name);
+  }catch{note('Could not load this section. Check access and try again.');}
+  finally{if(output)output.textContent='';}
+}
+document.querySelectorAll('[data-admin-panel]').forEach(button=>button.addEventListener('click',()=>void openPanel(button.dataset.adminPanel)));
+document.querySelectorAll('[data-admin-back]').forEach(button=>button.addEventListener('click',showDashboard));
 let openFromLink=new URLSearchParams(location.search).get('manage')==='1';
 window.addEventListener('marvel-access-change',()=>{api=window.MarvelAccess||api;const was=!!authorized();account=api?.account||null;if(!authorized()){$('#admin-content').hidden=true;if(adminModal.open)closeManagement()}else if(!was||openFromLink)load().catch(()=>note('Could not load management data.'));if(openFromLink&&authorized()){openFromLink=false;history.replaceState(null,'',location.pathname+location.hash);openManagement()}});
 async function load(){
@@ -29,16 +69,12 @@ async function load(){
   if(!authorized()){return}
   const uid=api.auth.currentUser?.uid;
   if(uid&&loadedUid===uid){$('#admin-content').hidden=false;return}
+  loadedPanels.clear();ownerId=null;allTitles=[];
   $('#admin-content').hidden=false;note('Management access is ready.');
-  const {db,firestore:f}=api;
-  if(account.Fmanage||api.isOwner){
-    $('#user-section').hidden=false;$('#title-section').hidden=false;
-    try{const owner=await f.getDoc(f.doc(db,'system/owner'));ownerId=owner.data()?.uid;}catch{ownerId=null;}
-    $('#management-role').textContent=api.isOwner||ownerId===api.auth.currentUser.uid?'Owner': 'Senior manager';
-    const results=await Promise.allSettled([users(),titles(),requests()]);
-    if(results.some(r=>r.status==='rejected'))note('Management opened. Some data could not load; check the published Firestore rules and account role.');
-  }else $('#management-role').textContent='Manager';
-  try{const settings=await f.getDoc(f.doc(db,'settings/basic'));if(settings.exists()){$('#basic-settings').elements.announcement.value=settings.data().announcement||'';$('#basic-settings').elements.defaultTheme.value=settings.data().defaultTheme||'dark';}}catch{note('Management opened, but basic settings could not load.');}
+  const senior=account.Fmanage||api.isOwner;
+  document.querySelectorAll('[data-admin-panel][data-admin-senior]').forEach(el=>{el.hidden=!senior});
+  $('#management-role').textContent=api.isOwner?'Owner':senior?'Senior manager':'Manager';
+  if(api.isOwner)ownerId=uid;
   loadedUid=uid||null;
   }finally{loading=false}
 }
@@ -71,12 +107,18 @@ $('#basic-settings').onsubmit=async e=>{e.preventDefault();if(!authorized())retu
 $('#title-search').oninput=renderTitles;
 document.addEventListener('change',async e=>{const id=e.target.dataset?.role;if(!id||!authorized()||api.auth.currentUser.uid!==ownerId)return;const f=api.firestore,value=e.target.value;
   try{await f.updateDoc(f.doc(api.db,'users',id),{manage:value==='manage',Fmanage:value==='Fmanage',view:true,status:'approved',updatedAt:f.serverTimestamp()});note('Role updated.');await users()}catch{note('Could not update the role.')}});
-document.addEventListener('click',async e=>{const d=e.target.closest('#management-view button')?.dataset;if(!d||!api||!authorized())return;const f=api.firestore;
+document.addEventListener('click',async e=>{const button=e.target.closest('#management-view button[data-approve],#management-view button[data-disable],#management-view button[data-edit],#management-view button[data-request],#management-view button[data-reject],#management-view button[data-archive]');
+  if(!button||!api||!authorized()||button.disabled)return;
+  const d=button.dataset,f=api.firestore;
+  button.disabled=true;
+  if(d.approve)note('Approving user…');
+  else if(d.disable)note('Disabling user…');
   try{
     if(d.approve||d.disable){await f.updateDoc(f.doc(api.db,'users',d.approve||d.disable),{status:d.approve?'approved':'disabled',view:!!d.approve,updatedAt:f.serverTimestamp()});await users();note('User access updated.');}
     if(d.edit){const item=allTitles.find(x=>x.id===d.edit);if(!item)return;const title=prompt('Title',item.title);if(!title?.trim())return;await f.updateDoc(f.doc(api.db,'titles',item.id),{title:title.trim().slice(0,250)});await titles();note('Title updated.');}
     if(d.request){const reason=prompt('Why should this title be removed?');if(!reason?.trim())return;await f.addDoc(f.collection(api.db,'deletionRequests'),{titleId:d.request,reason:reason.trim().slice(0,1000),requestedBy:api.auth.currentUser.uid,createdAt:f.serverTimestamp(),status:'pending'});await requests();note('Removal request sent to the owner.');}
     if(d.reject&&api.auth.currentUser.uid===ownerId){await f.updateDoc(f.doc(api.db,'deletionRequests',d.reject),{status:'rejected'});await requests();note('Request rejected.');}
     if(d.archive&&api.auth.currentUser.uid===ownerId){await f.runTransaction(api.db,async tx=>{const req=f.doc(api.db,'deletionRequests',d.archive),snap=await tx.get(req);if(!snap.exists()||snap.data().status!=='pending')throw Error('Request no longer pending');const title=f.doc(api.db,'titles',snap.data().titleId),existing=await tx.get(title);if(!existing.exists())throw Error('Title missing');tx.update(title,{archived:true});tx.update(req,{status:'approved'});});await Promise.all([titles(),requests()]);note('Title archived after owner approval.');}
-  }catch{note('Action blocked or failed. Check your permissions.')}});
+  }catch(error){note(error?.code==='permission-denied'?'Permission denied. Check your management role and the published Firestore rules.':'Action failed. '+(error?.message||'Please try again.'));}
+  finally{if(button.isConnected)button.disabled=false;}});
 load().catch(()=>note('Could not load management data. Check Firebase configuration and access.'));

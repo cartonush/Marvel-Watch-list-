@@ -1,6 +1,8 @@
 import './access.js?v=1.5.8';
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let api,uid,rows=[],catalog=[];
+const cacheKey=()=>`marvel_friends_${uid}`;
+const loadingDone=()=>{$('#friends-loading').hidden=true};
 const message=s=>$('#friend-message').textContent=s;
 const pair=(a,b)=>[a,b].sort().join('_');
 const friendId=r=>r.a===uid?r.b:r.a;
@@ -12,17 +14,30 @@ function loadProgress(){
  const accepted=rows.filter(r=>r.status==='accepted');
  void Promise.all(accepted.map(showProgress));
 }
+function renderRows(){
+ const incoming=rows.filter(r=>r.status==='pending'&&r.requestedBy!==uid),outgoing=rows.filter(r=>r.status==='pending'&&r.requestedBy===uid),accepted=rows.filter(r=>r.status==='accepted');
+ panel('#pending-requests',incoming.map(r=>`<div class="friend-entry"><div><strong>@${esc(friendName(r))}</strong><small>Wants to compare journeys</small></div><div class="list-buttons"><button class="primary" data-accept="${esc(r.id)}">Accept</button><button class="secondary" data-remove="${esc(r.id)}">Decline</button></div></div>`).join(''));
+ panel('#sent-requests',outgoing.map(r=>`<div class="friend-entry"><div><strong>@${esc(friendName(r))}</strong><small>Waiting for approval</small></div><button class="secondary" data-remove="${esc(r.id)}">Cancel</button></div>`).join(''));
+ panel('#accepted-friends',accepted.map(r=>`<div class="friend-entry"><div><strong>@${esc(friendName(r))}</strong><small id="progress-${esc(r.id)}">Loading progress…</small></div><button class="text-button" data-remove="${esc(r.id)}">Remove friend</button></div>`).join(''));
+ loadingDone();loadProgress();
+}
+function showCachedFriends(){
+ try{
+  const saved=JSON.parse(sessionStorage.getItem(cacheKey())||'null');
+  if(saved&&Date.now()-saved.time<600000&&Array.isArray(saved.rows)){
+   rows=saved.rows.filter(r=>r&&typeof r.id==='string'&&['pending','accepted'].includes(r.status));
+   renderRows();message('Refreshing friends…');
+  }
+ }catch{ /* Cache is optional. */ }
+}
 async function refresh(){
  const f=api.firestore,c=f.collection(api.db,'friendships');
  try{
   const [first,second]=await Promise.all([f.getDocs(f.query(c,f.where('a','==',uid))),f.getDocs(f.query(c,f.where('b','==',uid)))]);
   rows=[...new Map([...first.docs,...second.docs].map(d=>[d.id,{id:d.id,...d.data()}])).values()];
-  const incoming=rows.filter(r=>r.status==='pending'&&r.requestedBy!==uid),outgoing=rows.filter(r=>r.status==='pending'&&r.requestedBy===uid),accepted=rows.filter(r=>r.status==='accepted');
-  panel('#pending-requests',incoming.map(r=>`<div class="friend-entry"><div><strong>@${esc(friendName(r))}</strong><small>Wants to compare journeys</small></div><div class="list-buttons"><button class="primary" data-accept="${esc(r.id)}">Accept</button><button class="secondary" data-remove="${esc(r.id)}">Decline</button></div></div>`).join(''));
-  panel('#sent-requests',outgoing.map(r=>`<div class="friend-entry"><div><strong>@${esc(friendName(r))}</strong><small>Waiting for approval</small></div><button class="secondary" data-remove="${esc(r.id)}">Cancel</button></div>`).join(''));
-  panel('#accepted-friends',accepted.map(r=>`<div class="friend-entry"><div><strong>@${esc(friendName(r))}</strong><small id="progress-${esc(r.id)}">Loading progress…</small></div><button class="text-button" data-remove="${esc(r.id)}">Remove friend</button></div>`).join(''));
-  loadProgress();
- }catch(e){message(errorText(e));for(const id of ['#pending-requests','#sent-requests','#accepted-friends'])panel(id,'<p class="subtle">Could not load friends.</p>')}
+  try{sessionStorage.setItem(cacheKey(),JSON.stringify({time:Date.now(),rows:rows.map(({id,a,b,aName,bName,requestedBy,status})=>({id,a,b,aName,bName,requestedBy,status}))}));}catch{ /* Storage may be unavailable. */ }
+  renderRows();message('');
+ }catch(e){loadingDone();message(errorText(e));if(!rows.length)for(const id of ['#pending-requests','#sent-requests','#accepted-friends'])panel(id,'<p class="subtle">Could not load friends.</p>')}
 }
 async function showProgress(r){
  const f=api.firestore,el=document.getElementById('progress-'+r.id);if(!el)return;
@@ -69,8 +84,7 @@ try{
  // Load the local catalog independently so the friends list can render as soon as Firestore responds.
  const baseCatalog=fetch('data.json',{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error('catalog');return r.json()});
  await api.ready;uid=api.auth.currentUser.uid;
- const enrichedCatalog=baseCatalog.then(data=>api.enrich(data)).then(data=>data.items).catch(()=>[]);
+ showCachedFriends();
  await refresh();
  catalog=(await baseCatalog).items;loadProgress();
- enrichedCatalog.then(merged=>{if(merged.length){catalog=merged;loadProgress()}});
-}catch(e){message('Could not load friends. Please reload the page.')}
+}catch(e){loadingDone();message('Could not load friends. Please reload the page.')}
