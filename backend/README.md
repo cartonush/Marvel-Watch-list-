@@ -45,3 +45,7 @@ The watchlist saves a local cache, publishes completed title counts to `friendPr
 ## Version 1.6 account sync
 
 On Firebase Spark, open Firebase Console → Firestore Database → Rules, replace the editor contents with the complete `backend/firestore.rules` from this version, then click **Publish**. No billing upgrade or Cloud Functions setup is needed. This adds account-scoped `userWatch/{uid}` reads and writes and shared `searchEngines` configuration. Keep all existing rules from the file together. Sign in on the updated website on your original phone first, wait for “Synced across your devices,” and then open the second device under the same username. If the status reports a rules error, publish the rules and reload the site. Saved lists and preferences sync; an unfinished swipe-list draft stays local. An export backup is still recommended.
+
+## Version 1.6.1 friend watch home
+
+Publish `backend/firestore.rules` again after updating the website. An approved friendship now grants read-only `get` access to the other person’s `userWatch/{uid}` document. Pending, removed, and unrelated accounts remain blocked; only the account owner may write. The friend home shows last-synced watch state and updates while open. It never mutates the visitor’s own account data.

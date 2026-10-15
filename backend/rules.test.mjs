@@ -116,14 +116,22 @@ test('friend requests require approval; progress stays private until accepted',a
  await assertFails(getDocs(collection(db('admin'),'friendships')));
  const progress=doc(other,'friendProgress/manager');
  await assertSucceeds(setDoc(progress,{username:'manager',watched:{m2:1},updatedAt:serverTimestamp()}));
+ const watch=doc(other,'userWatch/manager');
+ await assertSucceeds(setDoc(watch,{v:1,progress:{m2:1},lists:{0:{name:'Main route',ids:['m2']}},activeList:0,
+  settings:{route:'personal'},name:'Manager journey',updatedAt:serverTimestamp()}));
  await assertFails(getDoc(doc(d,'friendProgress/manager')));
+ await assertFails(getDoc(doc(d,'userWatch/manager')));
  await assertFails(updateDoc(ref,{status:'accepted',updatedAt:serverTimestamp()}));
  await assertSucceeds(updateDoc(doc(other,'friendships/manager_viewer'),{status:'accepted',updatedAt:serverTimestamp()}));
  await assertSucceeds(getDoc(doc(d,'friendProgress/manager')));
+ await assertSucceeds(getDoc(doc(d,'userWatch/manager')));
+ await assertFails(getDocs(collection(d,'userWatch')));
+ await assertFails(updateDoc(doc(d,'userWatch/manager'),{name:'Tampered',updatedAt:serverTimestamp()}));
  await assertFails(getDoc(doc(db('admin'),'friendProgress/manager')));
  await assertFails(updateDoc(doc(d,'friendProgress/manager'),{watched:{m2:0},updatedAt:serverTimestamp()}));
  await assertSucceeds(deleteDoc(ref));
  await assertFails(getDoc(doc(d,'friendProgress/manager')));
+ await assertFails(getDoc(doc(d,'userWatch/manager')));
 });
 test('the configured owner does not depend on profile role flags',async()=>{
  await env.withSecurityRulesDisabled(async c=>setDoc(doc(c.firestore(),'system/owner'),{uid:'pending'}));

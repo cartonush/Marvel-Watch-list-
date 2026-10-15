@@ -161,3 +161,23 @@ main.management-active > :not(#management-view){display:none!important}
 .site-result-link{display:inline-flex;justify-self:start;padding:14px 18px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--text);font-weight:700;text-decoration:none}.site-result-link:hover{border-color:var(--red);color:var(--red)}
 
 .cloud-sync-status{display:inline-flex;align-items:center;max-width:18rem;color:var(--muted);font-size:.78rem;line-height:1.3;overflow-wrap:anywhere}.cloud-sync-status[data-state=error]{color:#ffab83}.cloud-sync-status[data-state=working]{color:#d9b8ff}.top-actions .cloud-sync-status{max-width:12rem}main>.cloud-sync-status{margin:0 0 .65rem 0}
+
+/* Accepted friends see the account's watch route without access to editing controls. */
+.friend-home-page .sidebar,.friend-home-page #nav-shade,.friend-home-page #menu,.friend-home-page #save-indicator{display:none!important}
+.friend-home-page main{margin:0 auto;max-width:1320px;padding:28px 32px 80px}
+.friend-home-page .topbar{position:relative}
+.friend-home-top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 18px}
+.friend-readonly{font-size:10px;font-weight:800;letter-spacing:1.4px;color:var(--muted)}
+.friend-home-loading{max-width:680px;margin:48px auto;padding:32px;text-align:center}
+.friend-home-loading p{color:var(--muted);line-height:1.7}
+.friend-route{margin-top:24px}.friend-route h1{font-size:clamp(25px,4vw,40px);margin:6px 0}.friend-route .eyebrow{margin-bottom:6px}
+.friend-route>div{display:flex;flex-direction:column;gap:7px;min-width:0}.friend-route>div>span{color:var(--muted)}
+.friend-home-page .next-watch{margin-top:24px}.friend-home-page .next-poster{pointer-events:none}
+.friend-home-page .card .poster{cursor:default}.friend-home-page .card-actions{margin-top:12px}
+.friend-item-progress{height:5px;width:100%;background:var(--line);border-radius:8px;overflow:hidden;margin:10px 0}
+.friend-item-progress i{display:block;height:100%;background:var(--red);border-radius:8px}
+.friend-home-page .friend-time{font-size:22px}.friend-home-page .collection{margin-top:30px}
+.friend-detail{max-width:min(640px,calc(100vw - 30px))}.friend-detail .episode-grid{max-height:42vh;overflow:auto}
+.friend-episode{display:block;padding:8px;border:1px solid var(--line);border-radius:6px;color:var(--muted);font-size:12px}
+.friend-episode.complete{background:color-mix(in srgb,var(--green) 18%,transparent);color:var(--green)}
+@media(max-width:720px){.friend-home-page main{padding:18px 16px 64px}.friend-home-top{align-items:flex-start}.friend-readonly{font-size:9px}.friend-route{align-items:flex-start}.friend-home-page .stats{grid-template-columns:repeat(2,minmax(0,1fr))}}

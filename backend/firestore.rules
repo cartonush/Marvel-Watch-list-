@@ -125,7 +125,7 @@ service cloud.firestore {
         && (!d.keys().hasAny(['name']) || (d.name is string && d.name.size() <= 32));
     }
     match /userWatch/{uid} {
-      allow get: if approved() && request.auth.uid == uid;
+      allow get: if approved() && (request.auth.uid == uid || acceptedPair(uid));
       allow list, delete: if false;
       allow create, update: if approved() && request.auth.uid == uid
         && watchShape(request.resource.data);

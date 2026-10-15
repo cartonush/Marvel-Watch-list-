@@ -68,7 +68,7 @@ Nine requested titles now reference distinct local poster files. Six newly sourc
 
 ## Version 1.0.0
 
-The current displayed version is 1.6. Advance the patch version when a change is published to GitHub. Skip is a personal saved list separate from watched progress. Skipped titles leave Next to watch, stay uncompleted in statistics, and appear in Skipped Items across routes. Marking a skipped title watched clears its skipped flag. Undo, reset and full backup include the skipped list; old cookies/backups without it remain supported.
+The current displayed version is 1.6.1. Advance the patch version when a change is published to GitHub. Skip is a personal saved list separate from watched progress. Skipped titles leave Next to watch, stay uncompleted in statistics, and appear in Skipped Items across routes. Marking a skipped title watched clears its skipped flag. Undo, reset and full backup include the skipped list; old cookies/backups without it remain supported.
 
 
 ## Version 1.2
@@ -158,3 +158,7 @@ Search sites opens a Google search in a new tab with the quoted title and `site:
 ## Version 1.6
 
 Search opens a quoted Google search with `site:` filters in a new tab. Approved managers can add validated domains and custom search categories through the in-app dashboard. The built-in categories work on Firebase Spark without a backend. Watch progress, episode counts, favorites, skipped titles, settings, and saved personal lists sync by account through the protected `userWatch/{uid}` Firestore document. Browser cookies remain a local cache and existing backup export remains available. Publish the new Firestore rules before relying on sync or shared manager categories.
+
+## Version 1.6.1
+
+Accepted friends can open each other’s read-only watch home from My friends. It renders the friend’s selected route or saved personal list, per-title and per-episode progress, next title, viewing totals, and live updates from the friend’s private Firestore watch document. A friend request alone does not grant access, and removing the friendship revokes reads. The regular account home remains editable only by its owner. Publish the updated Firestore rules. Search remains the free new-tab site-filtered flow; embedded search is under evaluation.
