@@ -1,0 +1,26 @@
+name: Registration push alerts
+on:
+  schedule:
+    - cron: '3/5 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: marvel-registration-push
+  cancel-in-progress: false
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    if: ${{ vars.MARVEL_PUSH_ENABLED == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --omit=dev --no-audit --no-fund
+        working-directory: backend
+      - run: node send-push.mjs
+        working-directory: backend
+        env:
+          MARVEL_FIREBASE_SERVICE_ACCOUNT_B64: ${{ secrets.MARVEL_FIREBASE_SERVICE_ACCOUNT_B64 }}
+          MARVEL_VAPID_PRIVATE_KEY: ${{ secrets.MARVEL_VAPID_PRIVATE_KEY }}

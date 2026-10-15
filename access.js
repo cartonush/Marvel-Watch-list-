@@ -55,7 +55,7 @@ if (firebaseEnabled && firebaseConfig) {
       button.setAttribute('aria-label','Account menu');button.setAttribute('aria-expanded','false');
       let actions=document.getElementById('account-actions');
       if(!actions){actions=document.createElement('div');actions.id='account-actions';actions.className='account-menu';actions.hidden=true;document.body.append(actions)}
-      actions.innerHTML=`<strong>@${esc(current.username||usernameOf(user))}</strong>${document.getElementById('modal')?'<button type="button" data-open-profile>My watch profile</button>':''}<a href="friends.html">My friends</a><a href="search.html">Search sites</a>${(current.manage||current.Fmanage||isOwner)?document.getElementById('admin-modal')?'<button type="button" data-open-management>Manage site</button>':'<a href="index.html?manage=1">Manage site</a>':''}<button type="button" id="sign-out">Sign out</button>`;
+      actions.innerHTML=`<strong>@${esc(current.username||usernameOf(user))}</strong>${document.getElementById('modal')?'<button type="button" data-open-profile>My watch profile</button>':''}<a href="friends.html">My friends</a><a href="search.html">Search sites</a>${isOwner?'<button type="button" data-open-notifications>Notifications</button>':''}${(current.manage||current.Fmanage||isOwner)?document.getElementById('admin-modal')?'<button type="button" data-open-management>Manage site</button>':'<a href="index.html?manage=1">Manage site</a>':''}<button type="button" id="sign-out">Sign out</button>`;
       button.onclick=()=>{actions.hidden=!actions.hidden;button.setAttribute('aria-expanded',String(!actions.hidden));if(!actions.hidden){const r=button.getBoundingClientRect();actions.style.top=`${r.bottom+8}px`;actions.style.right=`${Math.max(10,innerWidth-r.right)}px`}};
       actions.querySelector('#sign-out').onclick=()=>signOut(auth);
       actions.querySelector('[data-open-profile]')?.addEventListener('click',()=>{actions.hidden=true;button.setAttribute('aria-expanded','false');document.dispatchEvent(new Event('marvel-open-profile'))});
@@ -143,6 +143,7 @@ if (firebaseEnabled && firebaseConfig) {
   }
   window.MarvelAccess={ready,catalog,enrich,get account(){return current},get isOwner(){return !!auth.currentUser&&ownerUid===auth.currentUser.uid},auth,db,
     firestore:{doc,getDoc,getDocFromServer,getDocs,collection,addDoc,updateDoc,deleteDoc,query,where,runTransaction,serverTimestamp,onSnapshot,setDoc}};
+  import('./push.js?v=1.6.2').catch(error=>console.warn('Notification setup unavailable',error));
   document.addEventListener('click',e=>{const menu=document.getElementById('account-actions'),button=document.getElementById('profile-button');if(menu&&!menu.hidden&&!menu.contains(e.target)&&!button?.contains(e.target)){menu.hidden=true;button?.setAttribute('aria-expanded','false')}});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){const menu=document.getElementById('account-actions');if(menu)menu.hidden=true;document.getElementById('profile-button')?.setAttribute('aria-expanded','false')}});
 }

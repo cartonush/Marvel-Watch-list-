@@ -6,7 +6,8 @@
     "test:rules": "node --test rules.test.mjs"
   },
   "dependencies": {
-    "firebase-admin": "^13.5.0"
+    "firebase-admin": "^13.5.0",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "firebase": "^12.0.0",

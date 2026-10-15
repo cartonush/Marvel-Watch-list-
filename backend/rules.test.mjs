@@ -140,3 +140,15 @@ test('the configured owner does not depend on profile role flags',async()=>{
  await assertSucceeds(setDoc(doc(d,'titles/owner-added'),{...title('Owner addition','pending'),createdAt:serverTimestamp()}));
  await env.withSecurityRulesDisabled(async c=>setDoc(doc(c.firestore(),'system/owner'),{uid:'owner'}));
 });
+test('only owner can subscribe a device and no browser can forge a delivered alert',async()=>{
+ const id='87654321-1234-4321-aaaa-0123456789ab';
+ const path=`pushSubscriptions/owner/devices/${id}`;
+ const subscription={endpoint:'https://push.example.test/device',expirationTime:null,
+  keys:{p256dh:'public-device-key',auth:'device-secret'}};
+ await assertFails(setDoc(doc(db('viewer'),path),{subscription,updatedAt:serverTimestamp()}));
+ await assertFails(setDoc(doc(db('owner'),path),{subscription,admin:true,updatedAt:serverTimestamp()}));
+ await assertSucceeds(setDoc(doc(db('owner'),path),{subscription,updatedAt:serverTimestamp()}));
+ await assertSucceeds(getDoc(doc(db('owner'),path)));
+ await assertFails(getDoc(doc(db('admin'),path)));
+ await assertFails(setDoc(doc(db('owner'),'pushDelivered/signup'),{sent:true}));
+});

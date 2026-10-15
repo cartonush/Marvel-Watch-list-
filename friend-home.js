@@ -1,4 +1,4 @@
-import './access.js?v=1.6.1';
+import './access.js?v=1.6.2';
 import {cleanDoc} from './sync-core.mjs';
 
 const $=s=>document.querySelector(s);

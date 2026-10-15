@@ -1,4 +1,4 @@
-import './access.js?v=1.6.1';
+import './access.js?v=1.6.2';
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let api,uid,rows=[],catalog=[];
 const cacheKey=()=>`marvel_friends_${uid}`;

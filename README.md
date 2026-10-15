@@ -8,13 +8,13 @@ Static output is `dist/`. Firebase project `marvel-list-database` is configured.
 
 ## Data
 
-`dist/data.json` contains 137 titles: the earlier 110-title watchlist plus 27 Wikipedia-based MCU additions. The 207 Wikipedia-only titles outside MCU and Doomsday have been removed. Progress from the former 344-title catalog is mapped to the retained titles by the historical position map. Data is a snapshot, not live synchronization. `watched` holds the source's checked titles for opt-in additive import; new visitors start fresh. Poster provenance is recorded per item.
+`dist/data.json` contains 137 titles: the earlier 110-title watchlist plus 27 Wikipedia-based MCU additions. The 207 Wikipedia-only titles outside MCU and Doomsday have been removed. Progress from the former 344-title catalog is mapped to the retained titles by the historical position map. The catalog is a static snapshot and does not automatically import future sheet edits. `watched` holds the source's checked titles for opt-in additive import; new visitors start fresh. Poster provenance is recorded per item.
 
 The source's unusual dates are preserved and explained in the data dialog. Runtime estimates for partly completed seasons divide total season duration evenly by episode count.
 
 ## Persistence
 
-Progress, favorites, and profile name are stored in a compact first-party cookie `marvel_watch_v1` with a 400-day rolling maximum age, SameSite=Lax, Path=/ and Secure on HTTPS. Up to five comparison snapshots use separate `marvel_friend_N` cookies. Cookies are browser/device scoped. Storage failures are shown and export remains available. Cookies are sent to this site's host in normal HTTP requests; there is no profile synchronization service.
+Progress, favorites, and profile name are cached in a compact first-party cookie `marvel_watch_v1` with a 400-day rolling maximum age, SameSite=Lax, Path=/ and Secure on HTTPS. Approved accounts also sync watch progress, lists, skips, favorites, and settings to their private `userWatch/{uid}` Firestore document. An unfinished swipe-list draft remains local. Storage failures are shown and export remains available.
 
 `MW1.` backup/share codes contain version, profile ID, name, timestamp, and the episode progress array. Downloads also contain favorites. Imported snapshots are strictly range-validated and names are escaped. Friend links use the URL fragment, which is removed after staging an import. The user must add the friend explicitly. Comparisons are snapshots, not live feeds.
 
@@ -68,7 +68,7 @@ Nine requested titles now reference distinct local poster files. Six newly sourc
 
 ## Version 1.0.0
 
-The current displayed version is 1.6.1. Advance the patch version when a change is published to GitHub. Skip is a personal saved list separate from watched progress. Skipped titles leave Next to watch, stay uncompleted in statistics, and appear in Skipped Items across routes. Marking a skipped title watched clears its skipped flag. Undo, reset and full backup include the skipped list; old cookies/backups without it remain supported.
+The current displayed version is 1.6.2. Advance the patch version when a change is published to GitHub. Skip is a personal saved list separate from watched progress. Skipped titles leave Next to watch, stay uncompleted in statistics, and appear in Skipped Items across routes. Marking a skipped title watched clears its skipped flag. Undo, reset and full backup include the skipped list; old cookies/backups without it remain supported.
 
 
 ## Version 1.2
@@ -162,3 +162,7 @@ Search opens a quoted Google search with `site:` filters in a new tab. Approved 
 ## Version 1.6.1
 
 Accepted friends can open each other’s read-only watch home from My friends. It renders the friend’s selected route or saved personal list, per-title and per-episode progress, next title, viewing totals, and live updates from the friend’s private Firestore watch document. A friend request alone does not grant access, and removing the friendship revokes reads. The regular account home remains editable only by its owner. Publish the updated Firestore rules. Search remains the free new-tab site-filtered flow; embedded search is under evaluation.
+
+## Version 1.6.2
+
+Owner device registration for standards-based Web Push is now included. The owner can enable it from the first-run prompt or account menu, and iPhone users need to open the Home Screen app to grant notification permission. A notification service worker opens the in-app management dashboard. Firestore rules allow only the owner to save their own device subscriptions. A scheduled GitHub Actions sender can check for pending registration requests and deliver an alert about every five minutes once its two private secrets and enable flag are configured. Follow `backend/README.md`; deploying the static site alone cannot send a background push. The search integration review and outstanding work are in `PROJECT-AUDIT.md`.

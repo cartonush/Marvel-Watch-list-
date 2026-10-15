@@ -130,6 +130,26 @@ service cloud.firestore {
       allow create, update: if approved() && request.auth.uid == uid
         && watchShape(request.resource.data);
     }
+    match /pushSubscriptions/{uid}/devices/{deviceId} {
+      // Only the owner can register their own device. The server sends from a private environment.
+      allow get, list: if owner() && request.auth.uid == uid;
+      allow create, update: if owner() && request.auth.uid == uid
+        && deviceId.matches('[a-f0-9-]{36}')
+        && request.resource.data.keys().hasOnly(['subscription','updatedAt'])
+        && request.resource.data.updatedAt == request.time
+        && request.resource.data.subscription is map
+        && request.resource.data.subscription.keys().hasAll(['endpoint','keys'])
+        && request.resource.data.subscription.keys().hasOnly(['endpoint','expirationTime','keys'])
+        && request.resource.data.subscription.endpoint is string
+        && request.resource.data.subscription.endpoint.size() < 1000
+        && request.resource.data.subscription.endpoint.matches('https://.*')
+        && request.resource.data.subscription.keys is map
+        && request.resource.data.subscription.keys.keys().hasAll(['p256dh','auth'])
+        && request.resource.data.subscription.keys.p256dh is string
+        && request.resource.data.subscription.keys.auth is string;
+      allow delete: if owner() && request.auth.uid == uid;
+    }
+    match /pushDelivered/{id} { allow read, write: if false; }
     function titleShape(d) {
       return d.keys().hasAll(['title','date','seconds','kind','episodes','createdBy','createdAt','archived','group','collections','url','poster','priority','reason'])
         && d.keys().hasOnly(['title','date','seconds','kind','episodes','createdBy','createdAt','archived','group','collections','url','poster','priority','reason','imdb'])
