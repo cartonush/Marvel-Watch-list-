@@ -68,7 +68,7 @@ Nine requested titles now reference distinct local poster files. Six newly sourc
 
 ## Version 1.0.0
 
-The current displayed version is 1.6.2. Advance the patch version when a change is published to GitHub. Skip is a personal saved list separate from watched progress. Skipped titles leave Next to watch, stay uncompleted in statistics, and appear in Skipped Items across routes. Marking a skipped title watched clears its skipped flag. Undo, reset and full backup include the skipped list; old cookies/backups without it remain supported.
+The current displayed version is 1.6.3. Advance the patch version when a change is published to GitHub. Skip is a personal saved list separate from watched progress. Skipped titles leave Next to watch, stay uncompleted in statistics, and appear in Skipped Items across routes. Marking a skipped title watched clears its skipped flag. Undo, reset and full backup include the skipped list; old cookies/backups without it remain supported.
 
 
 ## Version 1.2
@@ -166,3 +166,7 @@ Accepted friends can open each other’s read-only watch home from My friends. I
 ## Version 1.6.2
 
 Owner device registration for standards-based Web Push is now included. The owner can enable it from the first-run prompt or account menu, and iPhone users need to open the Home Screen app to grant notification permission. A notification service worker opens the in-app management dashboard. Firestore rules allow only the owner to save their own device subscriptions. A scheduled GitHub Actions sender can check for pending registration requests and deliver an alert about every five minutes once its two private secrets and enable flag are configured. Follow `backend/README.md`; deploying the static site alone cannot send a background push. The search integration review and outstanding work are in `PROJECT-AUDIT.md`.
+
+## Version 1.6.3
+
+Approved users can opt into device alerts and manage categories in the new Notifications page. A private inbox with unread badge and read markers keeps alerts available even when device push is delayed. Accepted friends can send direct messages; members can suggest a title with an IMDb link, and managers review suggestions in Manage site. The scheduled sender observes registrations, title suggestions, new titles, app releases, direct messages, search-engine edits, access changes, friend requests and acceptance, removal requests and completed title archival. Privileged access changes notify the subject and management peers at the same or higher level, while ordinary viewers do not receive notifications about unrelated role changes. Alert preferences suppress device push but keep inbox entries. The server credential and VAPID key are still required to activate the sender; publish the updated Firestore rules. The sender is scheduled about every five minutes and is not guaranteed instantaneous.

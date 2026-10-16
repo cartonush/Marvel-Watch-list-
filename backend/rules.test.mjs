@@ -55,11 +55,11 @@ test('owner can grant a role but cannot replace owner through browser',async()=>
  await assertSucceeds(updateDoc(doc(db('owner'),'users/viewer'),{manage:false,updatedAt:serverTimestamp()}));
 });
 test('archival approval requires owner and an archived title',async()=>{
- await assertSucceeds(setDoc(doc(db('admin'),'deletionRequests/request'),{titleId:'original',reason:'Duplicate',requestedBy:'admin',createdAt:serverTimestamp(),status:'pending'}));
+ await assertSucceeds(setDoc(doc(db('admin'),'deletionRequests/request'),{titleId:'original',reason:'Duplicate',requestedBy:'admin',createdAt:serverTimestamp(),updatedAt:serverTimestamp(),status:'pending'}));
  await assertFails(updateDoc(doc(db('admin'),'titles/original'),{archived:true}));
  await assertFails(updateDoc(doc(db('admin'),'deletionRequests/request'),{status:'approved'}));
  await assertFails(updateDoc(doc(db('owner'),'deletionRequests/request'),{status:'approved'}));
- const d=db('owner'),batch=writeBatch(d);batch.update(doc(d,'titles/original'),{archived:true});batch.update(doc(d,'deletionRequests/request'),{status:'approved'});await assertSucceeds(batch.commit());
+ const d=db('owner'),batch=writeBatch(d);batch.update(doc(d,'titles/original'),{archived:true});batch.update(doc(d,'deletionRequests/request'),{status:'approved',updatedAt:serverTimestamp()});await assertSucceeds(batch.commit());
  await assertFails(deleteDoc(doc(d,'titles/original')));
 });
 test('basic settings cannot carry authorization settings',async()=>{
@@ -140,7 +140,7 @@ test('the configured owner does not depend on profile role flags',async()=>{
  await assertSucceeds(setDoc(doc(d,'titles/owner-added'),{...title('Owner addition','pending'),createdAt:serverTimestamp()}));
  await env.withSecurityRulesDisabled(async c=>setDoc(doc(c.firestore(),'system/owner'),{uid:'owner'}));
 });
-test('only owner can subscribe a device and no browser can forge a delivered alert',async()=>{
+test('approved accounts subscribe only their own devices and no browser can forge an alert',async()=>{
  const id='87654321-1234-4321-aaaa-0123456789ab';
  const path=`pushSubscriptions/owner/devices/${id}`;
  const subscription={endpoint:'https://push.example.test/device',expirationTime:null,
@@ -150,5 +150,42 @@ test('only owner can subscribe a device and no browser can forge a delivered ale
  await assertSucceeds(setDoc(doc(db('owner'),path),{subscription,updatedAt:serverTimestamp()}));
  await assertSucceeds(getDoc(doc(db('owner'),path)));
  await assertFails(getDoc(doc(db('admin'),path)));
+ await assertSucceeds(setDoc(doc(db('viewer'),`pushSubscriptions/viewer/devices/${id}`),{subscription,updatedAt:serverTimestamp()}));
+ await assertFails(setDoc(doc(db('pending'),`pushSubscriptions/pending/devices/${id}`),{subscription,updatedAt:serverTimestamp()}));
  await assertFails(setDoc(doc(db('owner'),'pushDelivered/signup'),{sent:true}));
+});
+test('title suggestions are reviewable by managers but cannot impersonate another requester',async()=>{
+ const suggestion={title:'New film',imdb:'https://www.imdb.com/title/tt0371746/',reason:'Relevant',requestedBy:'viewer',status:'pending',createdAt:serverTimestamp(),updatedAt:serverTimestamp()};
+ await assertFails(setDoc(doc(db('viewer'),'titleRequests/fake'),{...suggestion,requestedBy:'owner'}));
+ await assertSucceeds(setDoc(doc(db('viewer'),'titleRequests/valid'),suggestion));
+ await assertSucceeds(getDoc(doc(db('viewer'),'titleRequests/valid')));
+ await assertFails(getDocs(collection(db('viewer'),'titleRequests')));
+ await assertSucceeds(getDocs(collection(db('manager'),'titleRequests')));
+ await assertFails(updateDoc(doc(db('viewer'),'titleRequests/valid'),{status:'approved',updatedAt:serverTimestamp()}));
+ await assertSucceeds(updateDoc(doc(db('manager'),'titleRequests/valid'),{status:'approved',updatedBy:'manager',updatedAt:serverTimestamp()}));
+});
+test('private messages require accepted friendship and cannot be edited',async()=>{
+ const d=db('viewer'),base={from:'viewer',to:'manager',text:'Hi',createdAt:serverTimestamp()};
+ await assertFails(setDoc(doc(d,'messages/before'),base));
+ await assertSucceeds(setDoc(doc(d,'friendships/manager_viewer'),{a:'manager',b:'viewer',aName:'manager',bName:'viewer',requestedBy:'viewer',status:'pending',createdAt:serverTimestamp(),updatedAt:serverTimestamp()}));
+ await assertSucceeds(updateDoc(doc(db('manager'),'friendships/manager_viewer'),{status:'accepted',updatedAt:serverTimestamp()}));
+ await assertSucceeds(setDoc(doc(d,'messages/hello'),base));
+ await assertSucceeds(getDoc(doc(db('manager'),'messages/hello')));
+ await assertFails(getDoc(doc(db('admin'),'messages/hello')));
+ await assertFails(setDoc(doc(db('manager'),'messages/spoof'),{...base,text:'Spoof'}));
+ await assertFails(updateDoc(doc(d,'messages/hello'),{text:'Changed'}));
+ await assertSucceeds(getDocs(query(collection(d,'messages'),where('from','==','viewer'))));
+ await assertSucceeds(getDocs(query(collection(db('manager'),'messages'),where('to','==','manager'))));
+ await assertFails(getDocs(collection(d,'messages')));
+});
+test('notification inbox is server-owned; recipient can only mark read',async()=>{
+ await env.withSecurityRulesDisabled(async c=>setDoc(doc(c.firestore(),'notifications/viewer/items/example'),{type:'message',title:'Hello',body:'A message',url:'messages.html',createdAt:new Date(),readAt:null}));
+ const own=doc(db('viewer'),'notifications/viewer/items/example');
+ await assertSucceeds(getDoc(own));
+ await assertFails(getDoc(doc(db('manager'),'notifications/viewer/items/example')));
+ await assertFails(setDoc(doc(db('viewer'),'notifications/viewer/items/forged'),{title:'Fake'}));
+ await assertFails(updateDoc(own,{title:'Changed'}));
+ await assertSucceeds(updateDoc(own,{readAt:serverTimestamp()}));
+ await assertSucceeds(setDoc(doc(db('viewer'),'notificationSettings/viewer'),{types:{message:false,release:true},updatedAt:serverTimestamp()}));
+ await assertFails(setDoc(doc(db('viewer'),'notificationSettings/owner'),{types:{message:false},updatedAt:serverTimestamp()}));
 });

@@ -52,11 +52,30 @@ Publish `backend/firestore.rules` again after updating the website. An approved 
 
 ## Version 1.6.2 registration Web Push
 
-The frontend uses the standard Push API, not Firebase Messaging. It works with iOS 16.4+ Home Screen apps and supported desktop browsers. On iPhone, use Share → Add to Home Screen and launch from that icon. The site shows a short opt-in card; the system permission prompt follows the owner's tap. A Safari tab on iPhone cannot use this flow. The service worker does not cache the site's content.
+The frontend uses the standard Push API, not Firebase Messaging. It works with iOS 16.4+ Home Screen apps and supported desktop browsers. On iPhone, use Share → Add to Home Screen and launch from that icon. The site shows a short opt-in card; the system permission prompt follows the user's tap. A Safari tab on iPhone cannot use this flow. The service worker does not cache the site's content.
 
-1. Publish the complete `backend/firestore.rules` in Firebase Console → Firestore Database → Rules. The new `pushSubscriptions/{ownerUid}/devices/{deviceId}` documents are private to the owner.
+1. Publish the complete `backend/firestore.rules` in Firebase Console → Firestore Database → Rules. `pushSubscriptions/{uid}/devices/{deviceId}` is private to each approved account. The new inbox, messages, title suggestions and preferences also require these rules.
 2. In the GitHub repository's Settings → Secrets and variables → Actions, create secrets `MARVEL_VAPID_PRIVATE_KEY` and `MARVEL_FIREBASE_SERVICE_ACCOUNT_B64`. The first is the private half of the public key in `push-config.js`. The second is the **base64 encoded contents** of a dedicated Google Cloud service-account JSON file for project `marvel-list-database`; keep the JSON and private key out of git and chat. Give the service account only the Firestore permissions required to read owner, users and subscriptions and write delivery markers / remove stale subscriptions. Never use the Firebase client `apiKey` as a server credential.
 3. Under Actions **Variables**, create `MARVEL_PUSH_ENABLED` with value `true`. The workflow `registration-push.yml` runs at minutes 3, 8, 13 and so on, plus manual runs. GitHub may delay or drop scheduled runs, and a public repository's schedule can be disabled after 60 days without activity.
-4. Sign in as the owner in the installed app or a desktop browser and tap **Enable notifications**. Confirm the device appears under `pushSubscriptions/<owner UID>/devices` in Firestore. Run the workflow manually once from the Actions tab and inspect its logs. A new pending user then generates one registration alert after the next successful run. Old pending users without a delivery marker may alert once during initial activation.
+4. Sign in on the installed app or a desktop browser and tap **Enable notifications**. Confirm the device appears under `pushSubscriptions/<account UID>/devices` in Firestore. Run the workflow manually once from the Actions tab and inspect its logs. The first run scans recent events and announces the current app version; subsequent runs use a persisted cursor. Open Notifications to see the inbox and device-alert preferences.
 
-The browser only registers a device. Sending runs in GitHub Actions with a private server credential; a static GitHub Pages page cannot send background push securely. Avoid sharing the service-account JSON or VAPID private key in a public issue or in the repository. If either is exposed, rotate it and update both ends. In the free Spark plan this does not require Cloud Functions, but GitHub Actions and Firestore usage are subject to their own limits. If the owner enables notifications on multiple devices, each gets an alert. Push delivery itself is best-effort; the management dashboard remains the source of truth.
+The browser only registers a device. Sending runs in GitHub Actions with a private server credential; a static GitHub Pages page cannot send background push securely. Avoid sharing the service-account JSON or VAPID private key in a public issue or in the repository. If either is exposed, rotate it and update both ends. In the free Spark plan this does not require Cloud Functions, but GitHub Actions and Firestore usage are subject to their own limits. Each subscribed device receives alerts for its account. Push delivery is best-effort; the inbox and management dashboard remain the source of truth. The sender runs at most once per schedule interval, not as an instant Firestore trigger.
+
+## Version 1.6.3 event coverage
+
+| Event | Recipient | Opens |
+|---|---|---|
+| Pending registration | Owner and senior managers | Manage users |
+| Title suggestion | Managers and above, excluding requester | Title suggestions |
+| Suggestion reviewed | Requester | Notifications |
+| New title | All approved accounts | Collection |
+| App release | All approved accounts | Home |
+| Direct message | Recipient only | Friend conversation |
+| Search-engine change | All approved accounts | Search |
+| Access changed | Subject, plus management at the subject's new or prior level and above; no unrelated viewers | Management / Notifications |
+| Removal requested | Owner and senior managers, excluding requester | Removal requests |
+| Title archived | All approved accounts | Notifications |
+| Removal rejected | Requester, owner and senior managers | Notifications |
+| Friend requested / accepted | Recipient / both participants | Friends |
+
+The browser cannot create inbox entries or event markers. It can create a friend message only for an accepted friendship and a title suggestion only under its own identity. Preferences can suppress device alerts per category; they do not hide inbox entries. The sender queries changes since its last successful run, writes one event ID per change and a recipient-scoped inbox entry, and uses a short push payload for private messages without message contents. A late scheduled run may delay alerts. Existing old deletion requests without `updatedAt` cannot generate retroactive alerts; new requests include it.

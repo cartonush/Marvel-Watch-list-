@@ -9,7 +9,7 @@ if (firebaseEnabled && firebaseConfig) {
     import('https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js')
   ]);
   const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
-  let current=null,unsub=null,resolveReady,ownerUid=null;
+  let current=null,unsub=null,unsubNotifications=null,notificationUid=null,resolveReady,ownerUid=null;
   const ready=new Promise(resolve=>resolveReady=resolve);
   const overlay=document.createElement('section');
   overlay.id='access-overlay';
@@ -55,7 +55,12 @@ if (firebaseEnabled && firebaseConfig) {
       button.setAttribute('aria-label','Account menu');button.setAttribute('aria-expanded','false');
       let actions=document.getElementById('account-actions');
       if(!actions){actions=document.createElement('div');actions.id='account-actions';actions.className='account-menu';actions.hidden=true;document.body.append(actions)}
-      actions.innerHTML=`<strong>@${esc(current.username||usernameOf(user))}</strong>${document.getElementById('modal')?'<button type="button" data-open-profile>My watch profile</button>':''}<a href="friends.html">My friends</a><a href="search.html">Search sites</a>${isOwner?'<button type="button" data-open-notifications>Notifications</button>':''}${(current.manage||current.Fmanage||isOwner)?document.getElementById('admin-modal')?'<button type="button" data-open-management>Manage site</button>':'<a href="index.html?manage=1">Manage site</a>':''}<button type="button" id="sign-out">Sign out</button>`;
+      actions.innerHTML=`<strong>@${esc(current.username||usernameOf(user))}</strong>${document.getElementById('modal')?'<button type="button" data-open-profile>My watch profile</button>':''}<a href="notifications.html">Notifications</a><a href="messages.html">Messages</a><a href="title-request.html">Suggest a title</a><a href="friends.html">My friends</a><a href="search.html">Search sites</a>${(current.manage||current.Fmanage||isOwner)?document.getElementById('admin-modal')?'<button type="button" data-open-management>Manage site</button>':'<a href="index.html?manage=1">Manage site</a>':''}<button type="button" id="sign-out">Sign out</button>`;
+      let bell=document.getElementById('notification-button');
+      if(!bell){bell=document.createElement('a');bell.id='notification-button';bell.className='notification-button';bell.href='notifications.html';bell.setAttribute('aria-label','Notifications');bell.innerHTML='🔔 <span id="notification-count" hidden></span>';button.before(bell)}
+      if(notificationUid!==user.uid){unsubNotifications?.();notificationUid=user.uid;
+        unsubNotifications=onSnapshot(collection(db,'notifications',user.uid,'items'),snap=>{const count=snap.docs.filter(d=>!d.data().readAt).length,bellCount=document.getElementById('notification-count');if(bellCount){bellCount.hidden=!count;bellCount.textContent=count>99?'99+':String(count)}},()=>{});
+      }
       button.onclick=()=>{actions.hidden=!actions.hidden;button.setAttribute('aria-expanded',String(!actions.hidden));if(!actions.hidden){const r=button.getBoundingClientRect();actions.style.top=`${r.bottom+8}px`;actions.style.right=`${Math.max(10,innerWidth-r.right)}px`}};
       actions.querySelector('#sign-out').onclick=()=>signOut(auth);
       actions.querySelector('[data-open-profile]')?.addEventListener('click',()=>{actions.hidden=true;button.setAttribute('aria-expanded','false');document.dispatchEvent(new Event('marvel-open-profile'))});
@@ -67,7 +72,7 @@ if (firebaseEnabled && firebaseConfig) {
       return;
     }
     window.dispatchEvent(new Event('marvel-access-change'));
-    overlay.hidden=false;document.getElementById('account-actions')?.remove();
+    overlay.hidden=false;document.getElementById('account-actions')?.remove();document.getElementById('notification-button')?.remove();unsubNotifications?.();unsubNotifications=null;notificationUid=null;
     if(!user){
       overlay.innerHTML=`<div class="access-panel"><div class="eyebrow">MARVEL LIST</div><h1>Sign in to your watchlist</h1><p>Choose a username and password. New accounts wait for approval before viewing the collection.</p><form id="access-form"><label>Username<input id="access-username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required minlength="3" maxlength="24" pattern="[A-Za-z][A-Za-z0-9_]{2,23}"></label><label>Password<input id="access-password" type="password" autocomplete="current-password" required minlength="8"></label><div class="modal-actions"><button class="primary" name="mode" value="login">Sign in</button><button class="secondary" name="mode" value="register">Register</button></div></form><p class="subtle">Forgot your password? Ask the site owner to help reset it.</p><p id="access-message" role="status">${esc(message)}</p></div>`;
       overlay.querySelector('#access-form').onsubmit=async e=>{
@@ -143,7 +148,7 @@ if (firebaseEnabled && firebaseConfig) {
   }
   window.MarvelAccess={ready,catalog,enrich,get account(){return current},get isOwner(){return !!auth.currentUser&&ownerUid===auth.currentUser.uid},auth,db,
     firestore:{doc,getDoc,getDocFromServer,getDocs,collection,addDoc,updateDoc,deleteDoc,query,where,runTransaction,serverTimestamp,onSnapshot,setDoc}};
-  import('./push.js?v=1.6.2').catch(error=>console.warn('Notification setup unavailable',error));
+  import('./push.js?v=1.6.3').catch(error=>console.warn('Notification setup unavailable',error));
   document.addEventListener('click',e=>{const menu=document.getElementById('account-actions'),button=document.getElementById('profile-button');if(menu&&!menu.hidden&&!menu.contains(e.target)&&!button?.contains(e.target)){menu.hidden=true;button?.setAttribute('aria-expanded','false')}});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){const menu=document.getElementById('account-actions');if(menu)menu.hidden=true;document.getElementById('profile-button')?.setAttribute('aria-expanded','false')}});
 }

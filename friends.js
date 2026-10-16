@@ -1,4 +1,4 @@
-import './access.js?v=1.6.2';
+import './access.js?v=1.6.3';
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let api,uid,rows=[],catalog=[];
 const cacheKey=()=>`marvel_friends_${uid}`;
@@ -18,7 +18,7 @@ function renderRows(){
  const incoming=rows.filter(r=>r.status==='pending'&&r.requestedBy!==uid),outgoing=rows.filter(r=>r.status==='pending'&&r.requestedBy===uid),accepted=rows.filter(r=>r.status==='accepted');
  panel('#pending-requests',incoming.map(r=>`<div class="friend-entry"><div><strong>@${esc(friendName(r))}</strong><small>Wants to compare journeys</small></div><div class="list-buttons"><button class="primary" data-accept="${esc(r.id)}">Accept</button><button class="secondary" data-remove="${esc(r.id)}">Decline</button></div></div>`).join(''));
  panel('#sent-requests',outgoing.map(r=>`<div class="friend-entry"><div><strong>@${esc(friendName(r))}</strong><small>Waiting for approval</small></div><button class="secondary" data-remove="${esc(r.id)}">Cancel</button></div>`).join(''));
- panel('#accepted-friends',accepted.map(r=>`<div class="friend-entry"><div><strong>@${esc(friendName(r))}</strong><small id="progress-${esc(r.id)}">Loading progress…</small></div><div class="list-buttons"><a class="primary" href="index.html?friend=${encodeURIComponent(friendId(r))}">View watchlist ↗</a><button class="text-button" data-remove="${esc(r.id)}">Remove friend</button></div></div>`).join(''));
+ panel('#accepted-friends',accepted.map(r=>`<div class="friend-entry"><div><strong>@${esc(friendName(r))}</strong><small id="progress-${esc(r.id)}">Loading progress…</small></div><div class="list-buttons"><a class="primary" href="index.html?friend=${encodeURIComponent(friendId(r))}">View watchlist ↗</a><a class="secondary" href="messages.html?friend=${encodeURIComponent(friendId(r))}">Message</a><button class="text-button" data-remove="${esc(r.id)}">Remove friend</button></div></div>`).join(''));
  loadingDone();loadProgress();
 }
 function showCachedFriends(){

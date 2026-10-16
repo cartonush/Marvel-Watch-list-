@@ -131,9 +131,9 @@ service cloud.firestore {
         && watchShape(request.resource.data);
     }
     match /pushSubscriptions/{uid}/devices/{deviceId} {
-      // Only the owner can register their own device. The server sends from a private environment.
-      allow get, list: if owner() && request.auth.uid == uid;
-      allow create, update: if owner() && request.auth.uid == uid
+      // Each approved account can subscribe only its own devices.
+      allow get, list: if approved() && request.auth.uid == uid;
+      allow create, update: if approved() && request.auth.uid == uid
         && deviceId.matches('[a-f0-9-]{36}')
         && request.resource.data.keys().hasOnly(['subscription','updatedAt'])
         && request.resource.data.updatedAt == request.time
@@ -147,9 +147,63 @@ service cloud.firestore {
         && request.resource.data.subscription.keys.keys().hasAll(['p256dh','auth'])
         && request.resource.data.subscription.keys.p256dh is string
         && request.resource.data.subscription.keys.auth is string;
-      allow delete: if owner() && request.auth.uid == uid;
+      allow delete: if approved() && request.auth.uid == uid;
     }
     match /pushDelivered/{id} { allow read, write: if false; }
+    match /notificationEvents/{id} { allow read, write: if false; }
+    match /notificationStates/{id} { allow read, write: if false; }
+    match /notifications/{uid}/items/{id} {
+      allow get, list: if approved() && request.auth.uid == uid;
+      allow update: if approved() && request.auth.uid == uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readAt'])
+        && request.resource.data.readAt == request.time;
+      allow create, delete: if false;
+    }
+    match /notificationSettings/{uid} {
+      allow get: if approved() && request.auth.uid == uid;
+      allow list: if false;
+      allow create, update: if approved() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['types','updatedAt'])
+        && request.resource.data.types is map
+        && request.resource.data.types.keys().hasOnly(['registration','titleRequest','release','message','search','role','deletion','titleAdded','friend'])
+        && request.resource.data.types.values().hasOnly([true,false])
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+    }
+    match /messages/{id} {
+      allow get: if approved() && request.auth.uid in [resource.data.from,resource.data.to];
+      allow list: if approved() && resource.data.from == request.auth.uid;
+      allow list: if approved() && resource.data.to == request.auth.uid;
+      allow create: if approved()
+        && request.resource.data.keys().hasAll(['from','to','text','createdAt'])
+        && request.resource.data.keys().hasOnly(['from','to','text','createdAt'])
+        && request.resource.data.from == request.auth.uid
+        && request.resource.data.to is string && request.resource.data.to != request.auth.uid
+        && activeUser(request.resource.data.to)
+        && acceptedPair(request.resource.data.to)
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0 && request.resource.data.text.size() <= 1000
+        && request.resource.data.createdAt == request.time;
+      allow update, delete: if false;
+    }
+    match /titleRequests/{id} {
+      allow get: if approved() && (resource.data.requestedBy == request.auth.uid || manage());
+      allow list: if manage();
+      allow create: if approved()
+        && request.resource.data.keys().hasAll(['title','imdb','reason','requestedBy','status','createdAt','updatedAt'])
+        && request.resource.data.keys().hasOnly(['title','imdb','reason','requestedBy','status','createdAt','updatedAt'])
+        && request.resource.data.title is string && request.resource.data.title.size() >= 2 && request.resource.data.title.size() <= 250
+        && request.resource.data.imdb is string && request.resource.data.imdb.matches('https://www[.]imdb[.]com/title/tt[0-9]{7,10}/')
+        && request.resource.data.reason is string && request.resource.data.reason.size() <= 1000
+        && request.resource.data.requestedBy == request.auth.uid && request.resource.data.status == 'pending'
+        && request.resource.data.createdAt == request.time && request.resource.data.updatedAt == request.time;
+      allow update: if manage() && resource.data.status == 'pending'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedAt','updatedBy'])
+        && request.resource.data.status in ['approved','rejected']
+        && request.resource.data.updatedBy == request.auth.uid
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+    }
     function titleShape(d) {
       return d.keys().hasAll(['title','date','seconds','kind','episodes','createdBy','createdAt','archived','group','collections','url','poster','priority','reason'])
         && d.keys().hasOnly(['title','date','seconds','kind','episodes','createdBy','createdAt','archived','group','collections','url','poster','priority','reason','imdb'])
@@ -190,16 +244,18 @@ service cloud.firestore {
     match /deletionRequests/{id} {
       allow read: if fullManage();
       allow create: if fullManage()
-        && request.resource.data.keys().hasOnly(['titleId','reason','requestedBy','createdAt','status'])
+        && request.resource.data.keys().hasOnly(['titleId','reason','requestedBy','createdAt','updatedAt','status'])
         && request.resource.data.titleId is string
         && exists(/databases/$(database)/documents/titles/$(request.resource.data.titleId))
         && request.resource.data.reason is string && request.resource.data.reason.size() > 0
         && request.resource.data.reason.size() <= 1000
         && request.resource.data.requestedBy == request.auth.uid
-        && request.resource.data.createdAt == request.time && request.resource.data.status == 'pending';
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time && request.resource.data.status == 'pending';
       allow update: if owner()
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedAt'])
         && resource.data.status == 'pending'
+        && request.resource.data.updatedAt == request.time
         && request.resource.data.status in ['approved','rejected']
         && (request.resource.data.status == 'rejected'
           || getAfter(/databases/$(database)/documents/titles/$(resource.data.titleId)).data.archived == true);

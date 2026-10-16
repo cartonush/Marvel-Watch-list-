@@ -3,11 +3,12 @@ self.addEventListener('push', event => {
   try { message = event.data?.json() || {}; } catch { message = {}; }
   const title = typeof message.title === 'string' ? message.title.slice(0, 80) : 'Marvel List';
   const body = typeof message.body === 'string' ? message.body.slice(0, 180) : 'You have an update.';
-  const target = new URL('index.html?manage=1', self.registration.scope);
+  const target = new URL(typeof message.url === 'string' ? message.url : 'notifications.html', self.registration.scope);
+  const safe = target.origin === self.location.origin && target.href.startsWith(self.registration.scope) ? target : new URL('notifications.html', self.registration.scope);
   event.waitUntil(self.registration.showNotification(title, {
     body, icon: 'icons/icon-192.png', badge: 'icons/icon-192.png',
     tag: typeof message.tag === 'string' ? message.tag.slice(0, 100) : 'marvel-list',
-    data: { url: target.href }
+    data: { url: safe.href }
   }));
 });
 

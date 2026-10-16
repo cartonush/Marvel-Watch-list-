@@ -1,10 +1,10 @@
-import './access.js?v=1.6.2';
+import './access.js?v=1.6.3';
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function imdbId(value){try{const u=new URL(value.trim());if(u.protocol!=='https:'||!['imdb.com','www.imdb.com','m.imdb.com'].includes(u.hostname))return null;return /^\/title\/(tt\d{7,10})\/?$/.exec(u.pathname)?.[1]||null}catch{return null}}
 function directPoster(value){try{const u=new URL(value.trim());return u.protocol==='https:'&&u.hostname==='m.media-amazon.com'&&u.pathname.startsWith('/images/')&&!u.username&&!u.password?u.href:null}catch{return null}}
 const suggestedPoster=id=>`https://images.metahub.space/poster/medium/${id}/img`;
 let api,account,ownerId,allTitles=[],loading=false,loadedUid=null;
-let searchDefaults=[],searchEngines=[];
+let searchDefaults=[],searchEngines=[],titleSuggestions=[],activeSuggestion=null;
 function searchDomain(raw){try{const u=new URL(raw.includes('://')?raw:'https://'+raw);if(u.protocol!=='https:'||u.username||u.password||u.port||u.pathname!=='/'||u.search||u.hash)return null;const host=u.hostname.toLowerCase().replace(/^www\./,'');return /^(?:[a-z0-9-]+\.)+[a-z]{2,}$/.test(host)?host:null}catch{return null}}
 const searchNote=message=>{$('#search-config-message').textContent=message;};
 const loadedPanels=new Set();
@@ -34,6 +34,7 @@ adminModal.addEventListener('cancel',e=>{
 });
 adminModal.addEventListener('close',()=>{management.hidden=true});
 function showDashboard(){
+  activeSuggestion=null;
   $('#admin-dashboard').hidden=false;
   document.querySelectorAll('[data-admin-screen]').forEach(el=>{el.hidden=true});
   $('#leave-management').textContent='← Back to watchlist';
@@ -60,6 +61,7 @@ async function openPanel(name){
       if(settings.exists()){$('#basic-settings').elements.announcement.value=settings.data().announcement||'';$('#basic-settings').elements.defaultTheme.value=settings.data().defaultTheme||'dark';}
     }
     if(name==='search')await loadSearchEngines();
+    if(name==='suggestions')await suggestions();
     if(name==='users'){
       if(!ownerId)try{const owner=await f.getDoc(f.doc(api.db,'system/owner'));ownerId=owner.data()?.uid||null;}catch{ownerId=null;}
       await users();
@@ -115,6 +117,16 @@ async function requests(){
   const pending=docs.docs.filter(d=>d.data().status==='pending');
   $('#admin-requests').innerHTML='<h3>Removal requests</h3>'+(pending.length?pending.map(r=>`<div class="admin-row"><div><strong>${esc(allTitles.find(x=>x.id===r.data().titleId)?.title||r.data().titleId)}</strong><small>${esc(r.data().reason)}</small></div>${api.auth.currentUser.uid===ownerId?`<button class="secondary" data-archive="${esc(r.id)}">Approve archival</button><button class="secondary" data-reject="${esc(r.id)}">Reject</button>`:''}</div>`).join(''):'<p class="subtle">No pending requests.</p>');
 }
+async function suggestions(){
+ const docs=await api.firestore.getDocs(api.firestore.collection(api.db,'titleRequests'));
+ titleSuggestions=docs.docs.filter(d=>d.data().status==='pending').map(d=>({id:d.id,...d.data()}));
+ $('#admin-suggestions').innerHTML=titleSuggestions.length?titleSuggestions.map(x=>`<div class="admin-row"><div><strong>${esc(x.title)}</strong><small><a href="${esc(x.imdb)}" target="_blank" rel="noopener noreferrer">IMDb ↗</a> · ${esc(x.reason||'No reason supplied')}</small></div><div class="list-buttons"><button class="secondary" data-add-suggestion="${esc(x.id)}">Review and add</button><button class="text-button" data-reject-suggestion="${esc(x.id)}">Reject</button></div></div>`).join(''):'<p class="subtle">No pending suggestions.</p>';
+}
+$('#admin-suggestions').addEventListener('click',async e=>{
+ const add=e.target.closest('[data-add-suggestion]'),reject=e.target.closest('[data-reject-suggestion]');
+ if(add){const x=titleSuggestions.find(x=>x.id===add.dataset.addSuggestion);if(!x)return;showDashboard();activeSuggestion=x.id;openPanel('add');addForm.elements.title.value=x.title;addForm.elements.imdb.value=x.imdb;updatePosterPreview();note('Review the poster and details, then add this suggestion.');return}
+ if(reject){reject.disabled=true;try{await api.firestore.updateDoc(api.firestore.doc(api.db,'titleRequests',reject.dataset.rejectSuggestion),{status:'rejected',updatedBy:api.auth.currentUser.uid,updatedAt:api.firestore.serverTimestamp()});await suggestions();note('Suggestion rejected.')}catch{note('Could not reject suggestion.')}finally{reject.disabled=false}}
+});
 async function loadSearchEngines(){
   if(!searchDefaults.length)searchDefaults=await fetch('search-engines.json',{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error('Could not load defaults');return r.json()});
   const docs=await api.firestore.getDocs(api.firestore.collection(api.db,'searchEngines'));
@@ -183,7 +195,7 @@ $('#add-title').onsubmit=async e=>{e.preventDefault();if(!authorized())return;co
   const group=String(v.get('group')),mcu=v.has('mcu'),seconds=v.get('minutes')?Math.round(Number(v.get('minutes'))*60):null;
   const item={title:String(v.get('title')).trim(),date,seconds,kind:String(v.get('kind')),episodes:Number(v.get('episodes')),group,collections:mcu?['marvel','mcu']:['marvel'],url:url||`https://www.imdb.com/title/${choice.id}/`,imdb:`https://www.imdb.com/title/${choice.id}/`,poster:choice.value,priority:'later',reason:'Added by a catalog manager.',archived:false,createdBy:api.auth.currentUser.uid,createdAt:f.serverTimestamp()};
   const submit=form.querySelector('button.primary');submit.disabled=true;addNote('Adding title…');
-  try{const saved=await f.addDoc(f.collection(api.db,'titles'),item);form.reset();posterPreview.hidden=true;posterPreview.dataset.ready='no';posterStatus.textContent='Paste the IMDb title link to load a poster suggestion.';addNote(`Saved: ${item.title}. It is in ${mcu?'All MCU and All Marvel':'All Marvel'}.`);viewAdded.hidden=false;window.dispatchEvent(new CustomEvent('marvel-catalog-change',{detail:{id:saved.id}}));if(account.Fmanage||api.isOwner)void titles().catch(()=>addNote('Title saved. Reload management to refresh the title list.'))}
+  try{const saved=await f.addDoc(f.collection(api.db,'titles'),item);let reviewWarning='';if(activeSuggestion){try{await f.updateDoc(f.doc(api.db,'titleRequests',activeSuggestion),{status:'approved',updatedBy:api.auth.currentUser.uid,updatedAt:f.serverTimestamp()});loadedPanels.delete('suggestions')}catch{reviewWarning=' The suggestion still needs to be marked reviewed.'}activeSuggestion=null};form.reset();posterPreview.hidden=true;posterPreview.dataset.ready='no';posterStatus.textContent='Paste the IMDb title link to load a poster suggestion.';addNote(`Saved: ${item.title}. It is in ${mcu?'All MCU and All Marvel':'All Marvel'}.${reviewWarning}`);viewAdded.hidden=false;window.dispatchEvent(new CustomEvent('marvel-catalog-change',{detail:{id:saved.id}}));if(account.Fmanage||api.isOwner)void titles().catch(()=>addNote('Title saved. Reload management to refresh the title list.'))}
   catch(error){addNote(error?.code==='permission-denied'?'Could not add title. Publish the updated Firestore rules for IMDb posters, then try again.':'Could not add title. '+(error?.message||'Please try again.'),true)}
   finally{submit.disabled=false}};
 $('#basic-settings').onsubmit=async e=>{e.preventDefault();if(!authorized())return;const f=api.firestore,v=new FormData(e.currentTarget);
@@ -200,9 +212,9 @@ document.addEventListener('click',async e=>{const button=e.target.closest('#mana
   try{
     if(d.approve||d.disable){await f.updateDoc(f.doc(api.db,'users',d.approve||d.disable),{status:d.approve?'approved':'disabled',view:!!d.approve,updatedAt:f.serverTimestamp()});await users();note('User access updated.');}
     if(d.edit){const item=allTitles.find(x=>x.id===d.edit);if(!item)return;const title=prompt('Title',item.title);if(!title?.trim())return;await f.updateDoc(f.doc(api.db,'titles',item.id),{title:title.trim().slice(0,250)});await titles();note('Title updated.');}
-    if(d.request){const reason=prompt('Why should this title be removed?');if(!reason?.trim())return;await f.addDoc(f.collection(api.db,'deletionRequests'),{titleId:d.request,reason:reason.trim().slice(0,1000),requestedBy:api.auth.currentUser.uid,createdAt:f.serverTimestamp(),status:'pending'});await requests();note('Removal request sent to the owner.');}
-    if(d.reject&&api.auth.currentUser.uid===ownerId){await f.updateDoc(f.doc(api.db,'deletionRequests',d.reject),{status:'rejected'});await requests();note('Request rejected.');}
-    if(d.archive&&api.auth.currentUser.uid===ownerId){await f.runTransaction(api.db,async tx=>{const req=f.doc(api.db,'deletionRequests',d.archive),snap=await tx.get(req);if(!snap.exists()||snap.data().status!=='pending')throw Error('Request no longer pending');const title=f.doc(api.db,'titles',snap.data().titleId),existing=await tx.get(title);if(!existing.exists())throw Error('Title missing');tx.update(title,{archived:true});tx.update(req,{status:'approved'});});await Promise.all([titles(),requests()]);note('Title archived after owner approval.');}
+    if(d.request){const reason=prompt('Why should this title be removed?');if(!reason?.trim())return;await f.addDoc(f.collection(api.db,'deletionRequests'),{titleId:d.request,reason:reason.trim().slice(0,1000),requestedBy:api.auth.currentUser.uid,createdAt:f.serverTimestamp(),updatedAt:f.serverTimestamp(),status:'pending'});await requests();note('Removal request sent to the owner.');}
+    if(d.reject&&api.auth.currentUser.uid===ownerId){await f.updateDoc(f.doc(api.db,'deletionRequests',d.reject),{status:'rejected',updatedAt:f.serverTimestamp()});await requests();note('Request rejected.');}
+    if(d.archive&&api.auth.currentUser.uid===ownerId){await f.runTransaction(api.db,async tx=>{const req=f.doc(api.db,'deletionRequests',d.archive),snap=await tx.get(req);if(!snap.exists()||snap.data().status!=='pending')throw Error('Request no longer pending');const title=f.doc(api.db,'titles',snap.data().titleId),existing=await tx.get(title);if(!existing.exists())throw Error('Title missing');tx.update(title,{archived:true});tx.update(req,{status:'approved',updatedAt:f.serverTimestamp()});});await Promise.all([titles(),requests()]);note('Title archived after owner approval.');}
   }catch(error){note(error?.code==='permission-denied'?'Permission denied. Check your management role and the published Firestore rules.':'Action failed. '+(error?.message||'Please try again.'));}
   finally{if(button.isConnected)button.disabled=false;}});
 load().catch(()=>note('Could not load management data. Check Firebase configuration and access.'));

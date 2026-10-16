@@ -21,7 +21,7 @@ async function registration() { return navigator.serviceWorker.register('push-wo
 
 async function enable() {
   const api = window.MarvelAccess;
-  if (!api?.isOwner || !api.auth.currentUser || !supported) return;
+  if (!api?.account || !api.auth.currentUser || !supported) return;
   const button = notice?.querySelector('[data-push-enable]');
   if (button) button.disabled = true;
   try {
@@ -30,11 +30,11 @@ async function enable() {
     if (permission !== 'granted') { message('Notifications were not allowed. Change this in your device settings to try again.'); return; }
     const worker = await registration();
     const subscription = await worker.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(vapidPublicKey) });
-    if (!api.isOwner || api.auth.currentUser?.uid !== currentUid) return;
+    if (!api.account || api.auth.currentUser?.uid !== currentUid) return;
     await api.firestore.setDoc(api.firestore.doc(api.db, 'pushSubscriptions', currentUid, 'devices', deviceId()), {
       subscription: subscription.toJSON(), updatedAt: api.firestore.serverTimestamp()
     });
-    message('Notifications enabled on this device. New registration requests will appear after the sender is connected.');
+    message('Notifications enabled on this device. Alerts will arrive when the sender is connected.');
     notice?.querySelector('[data-push-enable]')?.setAttribute('hidden', '');
   } catch (error) {
     console.error('Push registration failed', error);
@@ -44,7 +44,7 @@ async function enable() {
 
 async function show(force = false) {
   const api = window.MarvelAccess;
-  if (!api?.isOwner || !api.account || !api.auth.currentUser) { notice?.remove(); notice = null; currentUid = null; return; }
+  if (!api?.account || !api.auth.currentUser) { notice?.remove(); notice = null; currentUid = null; return; }
   currentUid = api.auth.currentUser.uid;
   if (!force && sessionStorage.getItem('marvel_push_dismissed')) return;
   if (!notice) {
@@ -61,7 +61,7 @@ async function show(force = false) {
   }
   if (currentUid !== api.auth.currentUser?.uid) return;
   notice.innerHTML = `<button type="button" class="push-dismiss" aria-label="Dismiss notification setup">×</button><strong>Registration alerts</strong><p data-push-message></p><button type="button" class="primary" data-push-enable>Enable notifications</button>`;
-  message(unavailable || (Notification.permission === 'denied' ? 'Notifications are blocked in this device’s settings.' : already ? 'Notifications are enabled on this device.' : 'Get an alert when someone requests an account.'));
+  message(unavailable || (Notification.permission === 'denied' ? 'Notifications are blocked in this device’s settings.' : already ? 'Notifications are enabled on this device.' : 'Get alerts for your account, messages and Marvel List updates.'));
   notice.querySelector('[data-push-enable]').hidden = !!unavailable || already || Notification.permission === 'denied';
   notice.querySelector('[data-push-enable]').addEventListener('click', enable);
   notice.querySelector('.push-dismiss').addEventListener('click', () => { sessionStorage.setItem('marvel_push_dismissed', '1'); notice.remove(); notice = null; });
