@@ -68,7 +68,7 @@ Nine requested titles now reference distinct local poster files. Six newly sourc
 
 ## Version 1.0.0
 
-The current displayed version is 1.6.3. Advance the patch version when a change is published to GitHub. Skip is a personal saved list separate from watched progress. Skipped titles leave Next to watch, stay uncompleted in statistics, and appear in Skipped Items across routes. Marking a skipped title watched clears its skipped flag. Undo, reset and full backup include the skipped list; old cookies/backups without it remain supported.
+The current displayed version is 1.6.4. Advance the patch version when a change is published to GitHub. Skip is a personal saved list separate from watched progress. Skipped titles leave Next to watch, stay uncompleted in statistics, and appear in Skipped Items across routes. Marking a skipped title watched clears its skipped flag. Undo, reset and full backup include the skipped list; old cookies/backups without it remain supported.
 
 
 ## Version 1.2
@@ -170,3 +170,7 @@ Owner device registration for standards-based Web Push is now included. The owne
 ## Version 1.6.3
 
 Approved users can opt into device alerts and manage categories in the new Notifications page. A private inbox with unread badge and read markers keeps alerts available even when device push is delayed. Accepted friends can send direct messages; members can suggest a title with an IMDb link, and managers review suggestions in Manage site. The scheduled sender observes registrations, title suggestions, new titles, app releases, direct messages, search-engine edits, access changes, friend requests and acceptance, removal requests and completed title archival. Privileged access changes notify the subject and management peers at the same or higher level, while ordinary viewers do not receive notifications about unrelated role changes. Alert preferences suppress device push but keep inbox entries. The server credential and VAPID key are still required to activate the sender; publish the updated Firestore rules. The sender is scheduled about every five minutes and is not guaranteed instantaneous.
+
+## Version 1.6.4
+
+The push sender accepts a raw service-account JSON GitHub secret so mobile setup does not require base64 encoding. Existing base64 secrets continue to work.

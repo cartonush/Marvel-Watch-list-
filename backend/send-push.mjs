@@ -4,10 +4,11 @@ import {getFirestore,Timestamp} from 'firebase-admin/firestore';
 import webPush from 'web-push';
 import {rank,recipients} from './notification-policy.mjs';
 
+const rawCredentials=process.env.MARVEL_FIREBASE_SERVICE_ACCOUNT_JSON;
 const encoded=process.env.MARVEL_FIREBASE_SERVICE_ACCOUNT_B64;
 const privateKey=process.env.MARVEL_VAPID_PRIVATE_KEY;
-if(!encoded||!privateKey)throw Error('Missing sender secrets. See backend/README.md.');
-const credentials=JSON.parse(Buffer.from(encoded,'base64').toString('utf8'));
+if((!rawCredentials&&!encoded)||!privateKey)throw Error('Missing sender secrets. See backend/README.md.');
+const credentials=JSON.parse(rawCredentials||Buffer.from(encoded,'base64').toString('utf8'));
 if(credentials.project_id!=='marvel-list-database')throw Error('Unexpected Firebase project.');
 initializeApp({credential:cert(credentials)});
 const db=getFirestore();

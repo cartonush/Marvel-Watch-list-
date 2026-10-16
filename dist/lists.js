@@ -1,4 +1,4 @@
-import './cloud-sync.js?v=1.6.3';
+import './cloud-sync.js?v=1.6.4';
 const L=MarvelLists,$=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function posterSrc(value){if(typeof value!=='string')return '';if(/^assets\/[a-zA-Z0-9_-]+\.webp$/.test(value))return value;if(/^imdb:tt\d{7,10}$/.test(value))return `https://images.metahub.space/poster/medium/${value.slice(5)}/img`;try{const u=new URL(value);if(u.protocol==='https:'&&u.hostname==='m.media-amazon.com'&&u.pathname.startsWith('/images/')&&!u.username&&!u.password)return u.href}catch{}return ''}
 let items=[],draft=null,history=[],drag=null;

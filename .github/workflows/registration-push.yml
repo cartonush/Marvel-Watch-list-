@@ -22,5 +22,6 @@ jobs:
       - run: node send-push.mjs
         working-directory: backend
         env:
+          MARVEL_FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.MARVEL_FIREBASE_SERVICE_ACCOUNT_JSON }}
           MARVEL_FIREBASE_SERVICE_ACCOUNT_B64: ${{ secrets.MARVEL_FIREBASE_SERVICE_ACCOUNT_B64 }}
           MARVEL_VAPID_PRIVATE_KEY: ${{ secrets.MARVEL_VAPID_PRIVATE_KEY }}

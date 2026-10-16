@@ -148,7 +148,7 @@ if (firebaseEnabled && firebaseConfig) {
   }
   window.MarvelAccess={ready,catalog,enrich,get account(){return current},get isOwner(){return !!auth.currentUser&&ownerUid===auth.currentUser.uid},auth,db,
     firestore:{doc,getDoc,getDocFromServer,getDocs,collection,addDoc,updateDoc,deleteDoc,query,where,runTransaction,serverTimestamp,onSnapshot,setDoc}};
-  import('./push.js?v=1.6.3').catch(error=>console.warn('Notification setup unavailable',error));
+  import('./push.js?v=1.6.4').catch(error=>console.warn('Notification setup unavailable',error));
   document.addEventListener('click',e=>{const menu=document.getElementById('account-actions'),button=document.getElementById('profile-button');if(menu&&!menu.hidden&&!menu.contains(e.target)&&!button?.contains(e.target)){menu.hidden=true;button?.setAttribute('aria-expanded','false')}});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){const menu=document.getElementById('account-actions');if(menu)menu.hidden=true;document.getElementById('profile-button')?.setAttribute('aria-expanded','false')}});
 }

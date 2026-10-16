@@ -1,4 +1,4 @@
-import './access.js?v=1.6.3';
+import './access.js?v=1.6.4';
 const form=document.getElementById('suggest-title'),status=document.getElementById('suggest-status');
 form.onsubmit=async event=>{
  event.preventDefault();const api=window.MarvelAccess;await api.ready;
