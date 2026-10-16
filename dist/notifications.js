@@ -1,4 +1,4 @@
-import './access.js?v=1.6.4';
+import './access.js?v=1.6.5';
 const api=window.MarvelAccess,$=s=>document.querySelector(s);
 const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const types={registration:'Registration requests',titleRequest:'Title suggestions',release:'App updates',message:'Messages',search:'Search engines',role:'Access changes',deletion:'Removal requests',titleAdded:'New titles',friend:'Friends'};

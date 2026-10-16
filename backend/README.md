@@ -83,3 +83,7 @@ The browser cannot create inbox entries or event markers. It can create a friend
 ## Version 1.6.4
 
 The push sender accepts a raw service-account JSON GitHub secret so mobile setup does not require base64 encoding. Existing base64 secrets continue to work.
+
+## Version 1.6.5
+
+Pending registration requests are reconciled on every run so requests missed by an earlier scan still reach management. Stable event IDs prevent duplicate alerts.

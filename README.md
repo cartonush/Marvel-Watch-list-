@@ -68,7 +68,7 @@ Nine requested titles now reference distinct local poster files. Six newly sourc
 
 ## Version 1.0.0
 
-The current displayed version is 1.6.4. Advance the patch version when a change is published to GitHub. Skip is a personal saved list separate from watched progress. Skipped titles leave Next to watch, stay uncompleted in statistics, and appear in Skipped Items across routes. Marking a skipped title watched clears its skipped flag. Undo, reset and full backup include the skipped list; old cookies/backups without it remain supported.
+The current displayed version is 1.6.5. Advance the patch version when a change is published to GitHub. Skip is a personal saved list separate from watched progress. Skipped titles leave Next to watch, stay uncompleted in statistics, and appear in Skipped Items across routes. Marking a skipped title watched clears its skipped flag. Undo, reset and full backup include the skipped list; old cookies/backups without it remain supported.
 
 
 ## Version 1.2
@@ -174,3 +174,7 @@ Approved users can opt into device alerts and manage categories in the new Notif
 ## Version 1.6.4
 
 The push sender accepts a raw service-account JSON GitHub secret so mobile setup does not require base64 encoding. Existing base64 secrets continue to work.
+
+## Version 1.6.5
+
+The push sender now reconciles all pending registrations on every run and creates one notification for each outstanding request, including requests missed by a prior scan. Existing event markers prevent repeat alerts.

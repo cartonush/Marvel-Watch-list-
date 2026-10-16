@@ -1,4 +1,4 @@
-import './access.js?v=1.6.4';
+import './access.js?v=1.6.5';
 import {cleanDoc,fromLocal,firstMerge,changes,overlay,removeAcknowledged,hasChanges,MAX_LISTS} from './sync-core.mjs';
 
 /* The cookies remain the device cache and backup source; Firestore is the account copy. */

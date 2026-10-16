@@ -70,6 +70,16 @@ await changed('users','updatedAt',async(uid,u)=>{
  }
  await db.doc(`notificationStates/user_${slug(uid)}`).set({rank:rank(uid,u,owner),status:u.status,updatedAt:until});
 });
+// Reconcile every still-pending account as well as incremental updates. This
+// recovers requests created before the sender's first successful scan or
+// missed by a delayed scheduled run. The stable event key prevents repeats.
+const pendingUsers=await db.collection('users').where('status','==','pending').get();
+for(const doc of pendingUsers.docs){
+ const u=doc.data(),all=await users();all[doc.id]=u;
+ await alert('registration',`registration_${doc.id}_${stamp(u.createdAt)}`,{uid:doc.id},
+  'New registration request',`@${username(all,doc.id)} is waiting for approval.`,
+  'index.html?manage=1',u.createdAt);
+}
 await changed('titleRequests','updatedAt',async(id,r)=>{
  const type=r.status==='pending'?'titleRequest':'titleRequestResolved';
  await alert(type,`title_request_${id}_${stamp(r.updatedAt)}`,r,
