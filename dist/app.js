@@ -84,7 +84,7 @@ function aboutModal(){openModal(`<div class="modal-kicker">BEHIND THE JOURNEY</d
 async function init(){try{if(globalThis.MarvelAccess)await MarvelAccess.ready;const res=await fetch('data.json',{cache:'no-cache'});if(!res.ok)throw Error('data');data=await res.json();validateCatalog(data);if(globalThis.MarvelAccess)data=await MarvelAccess.enrich(data);validateCatalog(data);items=data.items;globalThis.MarvelRetiredIds=new Set(data.retiredIds||[]);friends=[];prefs=normalizePrefs(readCookie('marvel_settings_v1'));const requestedRoute=new URLSearchParams(location.search||'').get('collection');if(['mcu','marvel'].includes(requestedRoute))prefs.route=requestedRoute;if(new URLSearchParams(location.search||'').has('personal')&&MarvelLists.active(items))prefs.route='personal';applyPrefs();const stored=readCookie('marvel_watch_v1'),old=normalizeProfile(stored);state=validProfile(old)?{...old,f:Array.isArray(old.f)?old.f.filter(x=>typeof x==='string'&&items.some(i=>i.id===x)):[]}:fresh();if(state.name==='\u05d4\u05de\u05e1\u05e2 \u05e9\u05dc\u05d9')state.name='My journey';if(globalThis.MarvelSync){writeCookie('marvel_watch_v1',state);await MarvelSync.start(data);const synced=normalizeProfile(readCookie('marvel_watch_v1'));if(synced)state=synced;prefs=normalizePrefs(readCookie('marvel_settings_v1'));if(['mcu','marvel'].includes(requestedRoute))prefs.route=requestedRoute;if(new URLSearchParams(location.search||'').has('personal')&&MarvelLists.active(items))prefs.route='personal';applyPrefs()}for(let i=0;i<5;i++){const f=normalizeProfile(readCookie('marvel_friend_'+i));if(validProfile(f)&&f.id!==state.id&&!friends.some(x=>x.id===f.id))friends.push(f)}$('#phase-nav').innerHTML=GROUPS.filter(x=>x[0]!=='extra').map(([id,title,,color])=>`<button class="nav-item" data-group="${id}" style="--phase:${color}"><span class="phase-dot"></span>${title}<span class="phase-english">PHASE ${id.padStart(2,'0')}</span></button>`).join('');watchReady=true;refresh();if(stored&&!old)toast('Saved profile could not be read. Import a backup before making changes.');else save();const friendCode=location.hash.startsWith('#friend=')?location.hash.slice(8):null;if(friendCode){try{const decoded=decodeURIComponent(friendCode);parseCode(decoded);friendsModal();$('#friend-code').value=decoded;toast('Snapshot received — select Add to comparison')}catch{toast('Invalid friend link — your watchlist is ready')}finally{history.replaceState(null,'',location.pathname+(location.search||''))}}}catch(e){$('#catalog').innerHTML='<div class="empty"><strong>We could not load the watchlist</strong><button class="secondary" data-retry>Try again</button></div>';console.error(e)}}
 $('#close-modal').onclick=closeModal;modal.addEventListener('click',e=>{if(e.target===modal){const r=modal.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)closeModal()}});
 document.addEventListener('marvel-open-profile',()=>state&&profileModal());$('#source-import').onclick=()=>state&&importModal();$('#about').onclick=()=>data&&aboutModal();$('#menu').onclick=()=>toggleSidebar();
-$('#search').oninput=e=>{query=e.target.value.trim();renderCatalog()};$('#type-filter').onchange=e=>{type=e.target.value;renderCatalog()};$('#sort').onchange=e=>{sort=e.target.value;renderCatalog()};$('#view-toggle').onclick=()=>{compact=!compact;prefs.compact=compact;savePrefs();$('#view-toggle').textContent=compact?'▦':'☷';$('#view-toggle').setAttribute('aria-label',compact?'Switch to poster view':'Switch to list view');renderCatalog()};
+let catalogSearchTimer;$('#search').oninput=e=>{query=e.target.value.trim();clearTimeout(catalogSearchTimer);catalogSearchTimer=setTimeout(()=>renderCatalog(),140)};$('#type-filter').onchange=e=>{type=e.target.value;renderCatalog()};$('#sort').onchange=e=>{sort=e.target.value;renderCatalog()};$('#view-toggle').onclick=()=>{compact=!compact;prefs.compact=compact;savePrefs();$('#view-toggle').textContent=compact?'▦':'☷';$('#view-toggle').setAttribute('aria-label',compact?'Switch to poster view':'Switch to list view');renderCatalog()};
 document.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;if('retry'in d){await init();return}if(!state)return;
  if('undo'in d){undoProgress();return}
  if('settings'in d)settingsModal();
@@ -161,12 +161,16 @@ function doomsdayPlan(now=Date.now()){
  const remaining=Math.max(0,total-m.seconds);
  return {milliseconds,remaining,unknown:m.unknown,partial:m.partial,hoursPerDay:milliseconds>0?remaining/3600/(milliseconds/86400000):null};
 }
-function updateDoomsday(now=Date.now()){
- if(!state||!items||document.hidden)return;
- const p=doomsdayPlan(now),seconds=Math.ceil(p.milliseconds/1000);
+function updateDoomsdayClock(now=Date.now()){
+ const milliseconds=Math.max(0,DOOMSDAY_DEADLINE-Number(now)),seconds=Math.ceil(milliseconds/1000);
  const values=[Math.floor(seconds/86400),Math.floor(seconds%86400/3600),Math.floor(seconds%3600/60),seconds%60];
- ['days','hours','minutes','seconds'].forEach((key,i)=>{$('#doom-'+key).textContent=String(values[i]).padStart(2,'0')});
- const expired=p.milliseconds===0,complete=p.remaining===0&&p.unknown===0;
+ const nodes=['days','hours','minutes','seconds'];
+ nodes.forEach((key,i)=>{const el=$('#doom-'+key);if(el)el.textContent=String(values[i]).padStart(2,'0')});
+}
+function updateDoomsday(){
+ if(!state||!items||document.hidden)return;
+ updateDoomsdayClock();
+ const p=doomsdayPlan(),expired=p.milliseconds===0,complete=p.remaining===0&&p.unknown===0;
  $('#doom-pace').textContent=expired?'— h/d':p.hoursPerDay>0&&p.hoursPerDay<0.1?'<0.1 h/d':p.hoursPerDay.toFixed(1)+' h/d';
  $('#doom-pace-label').textContent=expired?'The countdown has ended':complete?'Your route is complete!':'Daily viewing to finish your route';
  const skipped=items.some((x,i)=>inRoute(x)&&isSkipped(i)&&!isDone(i));
@@ -177,8 +181,16 @@ function updateDoomsday(now=Date.now()){
  (p.partial?'Partial-season runtimes are estimated. ':'')+
  (p.hoursPerDay>24?'This route needs more than 24 hours per day; choose a shorter route.':'Updates with your progress and time remaining.');
 }
-globalThis.setInterval?.(()=>updateDoomsday(),1000);
-document.addEventListener('visibilitychange',()=>updateDoomsday());
+let doomsdayTimer=null;
+function syncDoomsdayTimer(){
+ clearInterval(doomsdayTimer);doomsdayTimer=null;
+ if(document.hidden)return;
+ updateDoomsday();
+ doomsdayTimer=setInterval(updateDoomsdayClock,1000);
+}
+syncDoomsdayTimer();
+document.addEventListener('visibilitychange',syncDoomsdayTimer);
+globalThis.addEventListener?.('pagehide',()=>clearInterval(doomsdayTimer));
 globalThis.addEventListener?.('marvel-sync-status',event=>{const label=$('#cloud-sync-status');if(label){label.textContent=event.detail.message;label.dataset.state=event.detail.kind}});
 globalThis.addEventListener?.('marvel-cloud-update',()=>{if(!watchReady)return;const remote=normalizeProfile(readCookie('marvel_watch_v1'));if(!remote)return;state=remote;prefs=normalizePrefs(readCookie('marvel_settings_v1'));applyPrefs();refresh();publishFriendProgress()});
 globalThis.addEventListener?.('marvel-catalog-change',async event=>{
